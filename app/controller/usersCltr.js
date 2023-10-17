@@ -54,7 +54,7 @@ usersCltr.register = async (req, res) => {
         const newUser = await new User(body).save();
         return res
           .status(201)
-          .json({ message: "Email sent successfully", name: newUser.email });
+          .json({ message: "Email sent successfully", email: newUser.email });
       }
     });
   } catch (e) {
@@ -88,9 +88,10 @@ usersCltr.resendOtp = async (req, res) => {
           { otp: hasedOTP },
           { new: true }
         );
-        return res
-          .status(200)
-          .json({ message: "Email sent successfully", name: updatedOtp.email });
+        return res.status(200).json({
+          message: "Email sent successfully",
+          email: updatedOtp.email,
+        });
       }
     });
   } catch (e) {
@@ -141,11 +142,30 @@ usersCltr.login = async (req, res) => {
       return res.status(400).json({ error: "invalid username or password" });
     }
     const token = jwt.sign(
-      { Id: user._id, email: user.email, role: user.role },
+      { id: user._id, email: user.email, role: user.role },
       process.env.SECRET_KEY,
       { expiresIn: "7d" }
     );
     res.status(200).json({ token: `bearer ${token}` });
+  } catch (e) {
+    res.status(500).json(e);
+  }
+};
+
+usersCltr.profile = async (req, res) => {
+  const {id}=req.user
+  console.log(id,'cly')
+  try {
+    const user = await User.findById(id)
+    console.log(user)
+    const responseDate = _.pick(user, [
+      "firstName",
+      "lastName",
+      "email",
+      "mobileNumber",
+      "reviews",
+    ]);
+    res.json({ profileData: responseDate });
   } catch (e) {
     res.status(500).json(e);
   }

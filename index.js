@@ -10,6 +10,7 @@ const {
   loginSchemaValidation,
   otpVerificationSchema,
 } = require("./app/helper/registerSchemaValidation");
+const { userAuthorization } = require("./app/middleware/userAuthorization");
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -28,8 +29,14 @@ app.get(
   checkSchema(otpResendValidation),
   usersCltr.resendOtp
 );
-app.post('/api/register/otp',checkSchema(otpVerificationSchema),usersCltr.otpVerification)
+app.post(
+  "/api/register/otp",
+  checkSchema(otpVerificationSchema),
+  usersCltr.otpVerification
+);
 app.post("/api/login", checkSchema(loginSchemaValidation), usersCltr.login);
+
+app.get("/api/users/profile", userAuthorization, usersCltr.profile);
 
 app.listen(port, () => {
   console.log("server running at port", port);
