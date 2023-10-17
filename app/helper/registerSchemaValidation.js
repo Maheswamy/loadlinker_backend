@@ -51,6 +51,29 @@ const email = {
   },
 };
 
+const otpEmail = {
+  notEmpty: {
+    errorMessage: "email cannot be empty",
+  },
+  isEmail: {
+    errorMessage: "invalid email id",
+  },
+  custom: {
+    options: async (value, { req, res }) => {
+      try {
+        const user = await User.findOne({ email: value });
+        if (user) {
+          return true;
+        } else {
+          throw new Error("email not found");
+        }
+      } catch (e) {
+        throw new Error(e);
+      }
+    },
+  },
+};
+
 const mobileNumber = {
   notEmpty: {
     errorMessage: "mobile number cannot be empty",
@@ -101,4 +124,25 @@ const registerSchemaValidation = {
   role,
 };
 
-module.exports = { registerSchemaValidation };
+const otpResendValidation = {
+  email: otpEmail,
+};
+
+const loginSchemaValidation = {
+  username: {
+    notEmpty: {
+      errorMessage: "username cannot be empty",
+    },
+  },
+  password: {
+    notEmpty: {
+      errorMessage: "password cannot be empty",
+    },
+  },
+};
+
+module.exports = {
+  registerSchemaValidation,
+  otpResendValidation,
+  loginSchemaValidation,
+};

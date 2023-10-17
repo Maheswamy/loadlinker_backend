@@ -53,7 +53,7 @@ usersCltr.register = async (req, res) => {
         body.otp = await saltAndHash(otp);
         const newUser = await new User(body).save();
         return res
-          .status(200)
+          .status(201)
           .json({ message: "Email sent successfully", name: newUser.email });
       }
     });
@@ -63,7 +63,71 @@ usersCltr.register = async (req, res) => {
   }
 };
 
+usersCltr.resendOtp = async (req, res) => {
+  const body = _.pick(req.body, ["email"]);
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(404).json({ errors: errors.array() });
+    }
+    const otp = generateOTP();
+    const hasedOTP = await saltAndHash(otp);
+    const mailOptions = {
+      from: "mahendragowdas1997@gmail.com",
+      to: updatedOtp.email,
+      subject: `${updatedOtp.firstName} ${updatedOtp.lastName} OTP Verification Code`,
+      text: `please use the following OTP code:${otp}`,
+    };
+
+    transporter.sendMail(mailOptions, async (error, info) => {
+      if (error) {
+        return res.status(500).json({ error: "Error sending email" });
+      } else {
+        const updatedOtp = await User.findOneAndUpdate(
+          { email: body.email },
+          { otp: hasedOTP },
+          { new: true }
+        );
+        return res
+          .status(200)
+          .json({ message: "Email sent successfully", name: updatedOtp.email });
+      }
+    });
+  } catch (e) {
+    res.status(500).json(e);
+  }
+};
+
+usersCltr.otpVerification = async (req, res) => {};
+
+usersCltr.login = async (req, res) => {
+  const body = _.pick(req.body, ["username", "password"]);
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    let user = await User.findOne({ email: body.username });
+    if (!user) {
+      user = await User.findOne({ mobileNumber: body.username });
+    }
+    console.log(user);
+    if (!user) {
+      return res.status(400).json({ errors: "invalid username or password" });
+    }
+    const result = await bcryptjs.compare(body.password, user.password);
+    if (!result) {
+      return res.status(400).json({ error: "invalid username or password" });
+    }
+    const token = jwt.sign(
+      { Id: user._id, email: user.email, role: user.role },
+      process.env.SECRET_KEY,
+      { expiresIn: "7d" }
+    );
+    res.status(200).json({ token: `bearer ${token}` });
+  } catch (e) {
+    res.status(500).json(e);
+  }
+};
+
 module.exports = usersCltr;
-
-
-

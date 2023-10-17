@@ -22,6 +22,11 @@ const userSchema = new Schema(
       ref: "Review",
     },
     otp: String,
+    isVerified: {
+      type: Boolean,
+      default: false,
+      enum: [true, false],
+    },
   },
   { timestamps: true }
 );
