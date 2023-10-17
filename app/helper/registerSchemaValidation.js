@@ -1,4 +1,5 @@
 const User = require("../models/user-model");
+// const {isEmail,isMobilePhone} = require('validator');
 
 const firstName = {
   notEmpty: {
@@ -137,6 +138,19 @@ const loginSchemaValidation = {
   password: {
     notEmpty: {
       errorMessage: "password cannot be empty",
+    },
+  },
+  custom: {
+    options: async (value) => {
+      const validator = require("validator");
+      if (
+        validator.isEmail(value) ||
+        validator.isMobilePhone(value, "any", { strictMode: false })
+      ) {
+        return true;
+      } else {
+        throw new Error("Invalid email or mobile number ");
+      }
     },
   },
 };

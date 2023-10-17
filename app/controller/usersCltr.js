@@ -50,7 +50,7 @@ usersCltr.register = async (req, res) => {
       if (error) {
         return res.status(500).json({ error: "Error sending email" });
       } else {
-        body.otp = await saltAndHash(otp);
+        body.otp = otp;
         const newUser = await new User(body).save();
         return res
           .status(201)
@@ -71,7 +71,7 @@ usersCltr.resendOtp = async (req, res) => {
       return res.status(404).json({ errors: errors.array() });
     }
     const otp = generateOTP();
-    const hasedOTP = await saltAndHash(otp);
+    // const hasedOTP = await saltAndHash(otp);
     const mailOptions = {
       from: "mahendragowdas1997@gmail.com",
       to: updatedOtp.email,
@@ -85,7 +85,7 @@ usersCltr.resendOtp = async (req, res) => {
       } else {
         const updatedOtp = await User.findOneAndUpdate(
           { email: body.email },
-          { otp: hasedOTP },
+          { otp: otp },
           { new: true }
         );
         return res.status(200).json({
@@ -107,8 +107,8 @@ usersCltr.otpVerification = async (req, res) => {
       return res.status(400).json({ errors: errors.array() });
     }
     const user = await User.findOne({ email: body.email });
-    const result = await bcryptjs.compare(body.otp, user.otp);
-    if (!result) {
+
+    if (body.otp != user.otp) {
       return res.status(400).json({ error: "invalid OTP" });
     }
     const userUpdate = await User.findOneAndUpdate(
@@ -133,7 +133,6 @@ usersCltr.login = async (req, res) => {
     if (!user) {
       user = await User.findOne({ mobileNumber: body.username });
     }
-    console.log(user);
     if (!user) {
       return res.status(400).json({ errors: "invalid username or password" });
     }
@@ -153,11 +152,11 @@ usersCltr.login = async (req, res) => {
 };
 
 usersCltr.profile = async (req, res) => {
-  const {id}=req.user
-  console.log(id,'cly')
+  const { id } = req.user;
+  console.log(id, "cly");
   try {
-    const user = await User.findById(id)
-    console.log(user)
+    const user = await User.findById(id);
+    console.log(user);
     const responseDate = _.pick(user, [
       "firstName",
       "lastName",
