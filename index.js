@@ -8,6 +8,7 @@ const {
   registerSchemaValidation,
   otpResendValidation,
   loginSchemaValidation,
+  otpVerificationSchema,
 } = require("./app/helper/registerSchemaValidation");
 const app = express();
 app.use(express.json());
@@ -27,7 +28,7 @@ app.get(
   checkSchema(otpResendValidation),
   usersCltr.resendOtp
 );
-
+app.post('/api/register/otp',checkSchema(otpVerificationSchema),usersCltr.otpVerification)
 app.post("/api/login", checkSchema(loginSchemaValidation), usersCltr.login);
 
 app.listen(port, () => {

@@ -98,7 +98,28 @@ usersCltr.resendOtp = async (req, res) => {
   }
 };
 
-usersCltr.otpVerification = async (req, res) => {};
+usersCltr.otpVerification = async (req, res) => {
+  const body = _.pick(req.body, ["otp", "email"]);
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    const user = await User.findOne({ email: body.email });
+    const result = await bcryptjs.compare(body.otp, user.otp);
+    if (!result) {
+      return res.status(400).json({ error: "invalid OTP" });
+    }
+    const userUpdate = await User.findOneAndUpdate(
+      { email: body.email },
+      { isVerified: true, otp: null },
+      { new: true }
+    );
+    res.json({ message: `account verified ${userUpdate.firstName}` });
+  } catch (e) {
+    res.status(500).json(e);
+  }
+};
 
 usersCltr.login = async (req, res) => {
   const body = _.pick(req.body, ["username", "password"]);

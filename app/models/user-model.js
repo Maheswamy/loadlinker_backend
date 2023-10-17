@@ -21,7 +21,10 @@ const userSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Review",
     },
-    otp: String,
+    otp: {
+      type: String,
+      default: null,
+    },
     isVerified: {
       type: Boolean,
       default: false,

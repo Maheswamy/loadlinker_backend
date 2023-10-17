@@ -141,8 +141,25 @@ const loginSchemaValidation = {
   },
 };
 
+const otpVerificationSchema = {
+  otp: {
+    notEmpty: {
+      errorMessage: "OTP cannot be empty",
+    },
+    isLength: {
+      options: {
+        min: 6,
+        max: 6,
+      },
+      errorMessage: "OTP should be 6 digit",
+    },
+  },
+  email: otpEmail,
+};
+
 module.exports = {
   registerSchemaValidation,
   otpResendValidation,
   loginSchemaValidation,
+  otpVerificationSchema,
 };
