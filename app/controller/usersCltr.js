@@ -129,10 +129,8 @@ usersCltr.login = async (req, res) => {
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    let user = await User.findOne({ email: body.username });
-    if (!user) {
-      user = await User.findOne({ mobileNumber: body.username });
-    }
+    const user = await User.findOne({$or:[{ email: body.username }, {mobileNumber: body.username  }]});
+    
     if (!user) {
       return res.status(400).json({ errors: "invalid username or password" });
     }

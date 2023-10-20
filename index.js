@@ -10,7 +10,11 @@ const {
   loginSchemaValidation,
   otpVerificationSchema,
 } = require("./app/helper/registerSchemaValidation");
-const { userAuthorization } = require("./app/middleware/userAuthorization");
+const {
+  authenticateUser,
+  authorizeUser,
+} = require("./app/middleware/userAuthorization");
+const ownersCltr = require("./app/controller/ownerCltr");
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -36,7 +40,14 @@ app.post(
 );
 app.post("/api/login", checkSchema(loginSchemaValidation), usersCltr.login);
 
-app.get("/api/users/profile", userAuthorization, usersCltr.profile);
+app.get("/api/users/profile", authenticateUser, usersCltr.profile);
+
+app.post(
+  "/api/addvehicles",
+  authenticateUser,
+  authorizeUser(["admin", "owner"]),
+  ownersCltr.addVehicle
+);
 
 app.listen(port, () => {
   console.log("server running at port", port);
