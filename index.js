@@ -27,7 +27,7 @@ const storage = multer.memoryStorage();
 
 const upload = multer({
   storage: storage,
-  limits: { files: 5 },
+  limits: { image: 5 },
 });
 
 app.post(
@@ -53,8 +53,8 @@ app.get("/api/users/profile", authenticateUser, usersCltr.profile);
 app.post(
   "/api/addvehicles",
   upload.array("fields", 5),
-  authenticateUser,
-  authorizeUser(["owner"]),
+  // authenticateUser,
+  // authorizeUser(["owner"]),
   ownersCltr.addVehicle
 );
 
