@@ -4,6 +4,7 @@ const cors = require("cors");
 const dbConfig = require("./config/db");
 const usersCltr = require("./app/controller/usersCltr");
 const { checkSchema } = require("express-validator");
+const multer = require("multer");
 const {
   registerSchemaValidation,
   otpResendValidation,
@@ -21,6 +22,13 @@ app.use(cors());
 const port = process.env.PORT || 3300;
 
 dbConfig();
+
+const storage = multer.memoryStorage();
+
+const upload = multer({
+  storage: storage,
+  limits: { files: 5 },
+});
 
 app.post(
   "/api/register",
@@ -44,8 +52,9 @@ app.get("/api/users/profile", authenticateUser, usersCltr.profile);
 
 app.post(
   "/api/addvehicles",
+  upload.array("fields", 5),
   authenticateUser,
-  authorizeUser(["admin", "owner"]),
+  authorizeUser(["owner"]),
   ownersCltr.addVehicle
 );
 
