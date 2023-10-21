@@ -12,9 +12,10 @@ aws.config.update({
 const s3 = new aws.S3();
 
 const uploadFileToS3 = async (file,folder,userId) => {
+  console.log(file)
   const params = {
     Bucket: "loadlinker",
-    Key: `${folder}/${userId}${Date.now()}`,
+    Key: `${folder}/${Date.now()}${file.originalname}`,
     Body: file.buffer,
     ACL: "public-read",
   };

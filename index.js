@@ -16,6 +16,7 @@ const {
   authorizeUser,
 } = require("./app/middleware/userAuthorization");
 const ownersCltr = require("./app/controller/ownerCltr");
+const { vehicleSchemaValidation } = require("./app/helper/vehicleSchemaValidation");
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -52,11 +53,21 @@ app.get("/api/users/profile", authenticateUser, usersCltr.profile);
 
 app.post(
   "/api/addvehicles",
-  upload.array("fields", 5),
-  // authenticateUser,
-  // authorizeUser(["owner"]),
+  // upload.array("image", 5),
+  authenticateUser,
+  authorizeUser(["owner"]),
+  checkSchema(vehicleSchemaValidation),
   ownersCltr.addVehicle
 );
+
+app.post(
+  "/api/vehicleTypes",
+  authenticateUser,
+  authorizeUser(["admin"]),
+  ownersCltr.addVehicleType
+);
+
+app.get('/api/vehicleTypes',authenticateUser,ownersCltr.vehicleTypeList)
 
 app.listen(port, () => {
   console.log("server running at port", port);

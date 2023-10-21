@@ -12,7 +12,7 @@ const vehicleSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "VehicleModel",
     },
-    vehiclePhoto: [string],
+    vehiclePhoto: [String],
     status: {
       type: String,
       default: "pending",
@@ -24,7 +24,7 @@ const vehicleSchema = new Schema(
     },
     loaded: Boolean,
     OwnerId: {
-      type: Schema.type.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "User",
     },
   },

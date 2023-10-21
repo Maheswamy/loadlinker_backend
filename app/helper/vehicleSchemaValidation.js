@@ -8,7 +8,7 @@ const vehicleSchemaValidation = {
     custom: {
       options: async (value) => {
         const vehicle = await Vehicle.findOne({ vehicleNumber: value });
-        if (!vehicle) {
+        if (vehicle) {
           throw new Error("vehicle already exists");
         } else {
           return true;
@@ -23,7 +23,8 @@ const vehicleSchemaValidation = {
     custom: {
       options: async (value) => {
         const vehicle = await Vehicle.findOne({ rcNumber: value });
-        if (!vehicle) {
+        console.log(vehicle)
+        if (vehicle) {
           throw new Error("vehicle  already exists");
         } else {
           return true;
