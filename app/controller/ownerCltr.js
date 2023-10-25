@@ -6,21 +6,6 @@ const { validationResult } = require("express-validator");
 
 const ownersCltr = {};
 
-// ownersCltr.addVehicle = async (req, res) => {
-//   try {
-//     const promises = req.files.map((ele) => uploadFileToS3(ele, "vehicle"));
-//     const uploadedImage = await Promise.all(promises);
-//     const vehiclePhoto = uploadedImage.reduce((pv, cv) => {
-//       pv.push(cv.Location);
-//       return pv;
-//     }, []);
-//     res.json({ image: vehiclePhoto });
-//   } catch (e) {
-//     console.log(e);
-//     res.status(500).json(e);
-//   }
-// };
-
 ownersCltr.addVehicle = async (req, res) => {
   const body = _.pick(req.body, [
     "vehicleNumber",
@@ -34,7 +19,19 @@ ownersCltr.addVehicle = async (req, res) => {
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    res.json({body})
+
+    const { rc, vehicleImage } = req.files;
+    const arrayBuffer = [...rc, ...vehicleImage];
+    const promises = arrayBuffer.map((ele) =>
+      uploadFileToS3(ele, ele.fieldname, req.user.id)
+    );
+    const allResolved = await Promise.all(promises);
+    const vehiclePhoto = allResolved.reduce((pv, cv) => {
+      pv.push({ url: cv.Location, key: cv.Key });
+      return pv;
+    }, []);
+
+    res.json({ body, image: vehiclePhoto });
   } catch (e) {
     res.status(500).json(e);
   }

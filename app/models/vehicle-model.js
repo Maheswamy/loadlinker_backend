@@ -5,8 +5,7 @@ const vehicleSchema = new Schema(
   {
     vehicleNumber: String,
     rcNumber: String,
-    permitType: String,
-    permittedLoadCapacity: String,
+    permittedLoadCapacity: Number,
     rcImage: [String],
     vehicalType: {
       type: Schema.Types.ObjectId,

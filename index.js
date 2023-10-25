@@ -16,7 +16,9 @@ const {
   authorizeUser,
 } = require("./app/middleware/userAuthorization");
 const ownersCltr = require("./app/controller/ownerCltr");
-const { vehicleSchemaValidation } = require("./app/helper/vehicleSchemaValidation");
+const {
+  vehicleSchemaValidation,
+} = require("./app/helper/vehicleSchemaValidation");
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -24,12 +26,7 @@ const port = process.env.PORT || 3300;
 
 dbConfig();
 
-const storage = multer.memoryStorage();
-
-const upload = multer({
-  storage: storage,
-  limits: { image: 5 },
-});
+const upload = multer();
 
 app.post(
   "/api/register",
@@ -53,7 +50,7 @@ app.get("/api/users/profile", authenticateUser, usersCltr.profile);
 
 app.post(
   "/api/addvehicles",
-  // upload.array("image", 5),
+  upload.fields([{ name: "vehicleImage" }, { name: "rc" }]),
   authenticateUser,
   authorizeUser(["owner"]),
   checkSchema(vehicleSchemaValidation),
@@ -67,7 +64,7 @@ app.post(
   ownersCltr.addVehicleType
 );
 
-app.get('/api/vehicleTypes',authenticateUser,ownersCltr.vehicleTypeList)
+app.get("/api/vehicleTypes", authenticateUser, ownersCltr.vehicleTypeList);
 
 app.listen(port, () => {
   console.log("server running at port", port);
