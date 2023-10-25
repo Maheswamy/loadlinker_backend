@@ -3,6 +3,7 @@ const User = require("../models/user-model");
 const _ = require("lodash");
 const VehicleType = require("../models/vehicleType-model");
 const { validationResult } = require("express-validator");
+const Vehicle = require("../models/vehicle-model");
 
 const ownersCltr = {};
 
@@ -26,12 +27,24 @@ ownersCltr.addVehicle = async (req, res) => {
       uploadFileToS3(ele, ele.fieldname, req.user.id)
     );
     const allResolved = await Promise.all(promises);
-    const vehiclePhoto = allResolved.reduce((pv, cv) => {
-      pv.push({ url: cv.Location, key: cv.Key });
-      return pv;
-    }, []);
+    const splitImage = allResolved.reduce(
+      (pv, cv) => {
+        if (cv.Location.includes("vehicleImage")) {
+          pv.vehicleImages.push({ url: cv.Location, key: cv.Key });
+        } else {
+          pv.rcImages.push({ url: cv.Location, key: cv.Key });
+        }
+        return pv;
+      },
+      { rcImages: [], vehicleImages: [] }
+    );
 
-    res.json({ body, image: vehiclePhoto });
+    (body.rcImages = splitImage.rcImages),
+      (body.vehicleImages = splitImage.vehicleImages);
+      body.OwnerId=req.user.id
+    const newVehicle = await new Vehicle(body).save();
+
+    res.json(newVehicle);
   } catch (e) {
     res.status(500).json(e);
   }

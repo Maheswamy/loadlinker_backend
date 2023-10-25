@@ -6,12 +6,12 @@ const vehicleSchema = new Schema(
     vehicleNumber: String,
     rcNumber: String,
     permittedLoadCapacity: Number,
-    rcImage: [{ url: String, key: String }],
+    rcImages: [{ url: String, key: String }],
     vehicalType: {
       type: Schema.Types.ObjectId,
       ref: "VehicleModel",
     },
-    rcImage: [{ url: String, key: String }],
+    vehicleImages: [{ url: String, key: String }],
     status: {
       type: String,
       default: "pending",
