@@ -6,12 +6,12 @@ const vehicleSchema = new Schema(
     vehicleNumber: String,
     rcNumber: String,
     permittedLoadCapacity: Number,
-    rcImage: [String],
+    rcImage: [{ url: String, key: String }],
     vehicalType: {
       type: Schema.Types.ObjectId,
       ref: "VehicleModel",
     },
-    vehiclePhoto: [String],
+    rcImage: [{ url: String, key: String }],
     status: {
       type: String,
       default: "pending",
@@ -21,7 +21,10 @@ const vehicleSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "User",
     },
-    loaded: Boolean,
+    loaded: {
+      type: Boolean,
+      default: false,
+    },
     OwnerId: {
       type: Schema.Types.ObjectId,
       ref: "User",
@@ -30,6 +33,6 @@ const vehicleSchema = new Schema(
   { timestamps: true }
 );
 
-const Vehicle=model('Vehicle',vehicleSchema)
+const Vehicle = model("Vehicle", vehicleSchema);
 
-module.exports=Vehicle
+module.exports = Vehicle;
