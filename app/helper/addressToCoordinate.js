@@ -14,8 +14,7 @@ const addressToCoordinate = async (address) => {
 
   try {
     const response = await axios.get(
-      `https://graphhopper.com/api/1/geocode?${query}`,
-      { method: "GET" }
+      `https://graphhopper.com/api/1/geocode?${query}`
     );
     return response.data;
   } catch (e) {
@@ -28,26 +27,32 @@ const calculateDistance = async (coordinates) => {
     key: process.env.GRAPHHOPPER_API_KEY,
   }).toString();
 
-  const resp = await fetch(`https://graphhopper.com/api/1/route?${query}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      points: coordinates,
-      snap_preventions: ["motorway", "ferry", "tunnel"],
-      details: ["road_class", "surface"],
-      vehicle: "truck",
-      locale: "en",
-      instructions: true,
-      calc_points: true,
-      points_encoded: false,
-    }),
-  });
+  try {
+    const resp = await axios.post(
+      `https://graphhopper.com/api/1/route?${query}`,
+      {
+        points: coordinates,
+        snap_preventions: ["motorway", "ferry", "tunnel"],
+        details: ["road_class", "surface"],
+        vehicle: "truck",
+        locale: "en",
+        instructions: true,
+        calc_points: true,
+        points_encoded: false,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-  const data = await resp.json();
-  console.log(data, "mhaneghj");
-  return data;
+    const data = resp.data;
+    console.log(data, "mhaneghj");
+    return data;
+  } catch (error) {
+    return error;
+  }
 };
 
 module.exports = { addressToCoordinate, calculateDistance };
