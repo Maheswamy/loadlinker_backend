@@ -21,6 +21,8 @@ const {
 } = require("./app/helper/vehicleSchemaValidation");
 const shipperCltr = require("./app/controller/shipperCltr");
 const addLoadValidation = require("./app/helper/addLoadValidation");
+const bidingSchemaValidation = require("./app/helper/bidingSchemaValidation");
+const biddingCltr = require("./app/controller/bidingCltr");
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -76,6 +78,31 @@ app.post(
   authorizeUser(["shipper"]),
   checkSchema(addLoadValidation),
   shipperCltr.create
+);
+app.get("/api/allLoads", authenticateUser, shipperCltr.allEnquiry);
+app.get(
+  "/api/allLoads/:enquiryId",
+  authenticateUser,
+  shipperCltr.singleEnquiry
+);
+
+// api for biding the amount for load
+
+app.post(
+  "/api/biding/:enquiryLoadId",
+  authenticateUser,
+  authorizeUser(["owner"]),
+  checkSchema(bidingSchemaValidation),
+  biddingCltr.create
+);
+
+// modifying the bid placed by owner of vehicle
+
+app.put(
+  "/api/biding/:enquiryLoadId/:bidId",
+  authenticateUser,
+  authorizeUser(["owner"]),
+  biddingCltr.update
 );
 
 app.listen(port, () => {

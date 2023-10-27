@@ -43,13 +43,31 @@ shipperCltr.create = async (req, res) => {
       [body.pickUpLocation.lng, body.pickUpLocation.lat],
       [body.unloadLocation.lng, body.unloadLocation.lat],
     ]);
-    console.log(distance.paths[0].distance / 1000);
+    body.distance = distance.paths[0].distance / 1000;
+    body.shipperId = req.user.id;
     const newLoad = await new Enquiry(body).save();
 
-    res.json({ newLoad, distance: distance.paths[0].distance / 1000 });
+    res.json({ newLoad });
   } catch (e) {
     res.status(500).json(e);
   }
 };
 
+shipperCltr.allEnquiry = async (req, res) => {
+  try {
+    const allEnquiry = await Enquiry.find();
+    res.json(allEnquiry);
+  } catch (e) {
+    res.status(500).json(e);
+  }
+};
+shipperCltr.singleEnquiry = async (req, res) => {
+  const id = req.params.enquiryId;
+  try {
+    const allEnquiry = await Enquiry.findById(id);
+    res.json(allEnquiry);
+  } catch (e) {
+    res.status(500).json(e);
+  }
+};
 module.exports = shipperCltr;

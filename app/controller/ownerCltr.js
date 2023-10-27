@@ -4,6 +4,7 @@ const _ = require("lodash");
 const VehicleType = require("../models/vehicleType-model");
 const { validationResult } = require("express-validator");
 const Vehicle = require("../models/vehicle-model");
+const Enquiry = require("../models/enquiry-model");
 
 const ownersCltr = {};
 
@@ -41,7 +42,7 @@ ownersCltr.addVehicle = async (req, res) => {
 
     (body.rcImages = splitImage.rcImages),
       (body.vehicleImages = splitImage.vehicleImages);
-      body.OwnerId=req.user.id
+    body.OwnerId = req.user.id;
     const newVehicle = await new Vehicle(body).save();
 
     res.json(newVehicle);
@@ -71,5 +72,11 @@ ownersCltr.vehicleTypeList = async (req, res) => {
     res.status(500).json(e);
   }
 };
+
+
+
+// owner updating the biding amount
+
+
 
 module.exports = ownersCltr;

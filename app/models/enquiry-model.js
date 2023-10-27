@@ -1,8 +1,6 @@
 const mongoose = require("mongoose");
 const { Schema, model } = mongoose;
 
-
-
 const enquirySchema = new Schema({
   loadtype: String,
   loadWeight: Number,
@@ -12,7 +10,7 @@ const enquirySchema = new Schema({
     lat: String,
     lng: String,
   },
-  dateOfUnload:Date,
+  dateOfUnload: Date,
   unloadLocation: {
     address: String,
     lat: String,
@@ -34,7 +32,11 @@ const enquirySchema = new Schema({
     type: String,
     enum: ["advance", "after shipment"],
   },
-  distance:Number
+  distance: Number,
+  shipperId: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+  },
 });
 
 const Enquiry = model("Enquiry", enquirySchema);
