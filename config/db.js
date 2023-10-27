@@ -11,4 +11,4 @@ const dbConfig = async () => {
   }
 };
 
-module.exports=dbConfig
+module.exports = dbConfig;

@@ -8,7 +8,6 @@ const authenticateUser = async (req, res, next) => {
       const result = jwt.verify(token, process.env.SECRET_KEY);
       req.user = result;
       next();
-
     } else {
       return res.status(401).json({ error: "authorization failed" });
     }

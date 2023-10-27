@@ -19,6 +19,8 @@ const ownersCltr = require("./app/controller/ownerCltr");
 const {
   vehicleSchemaValidation,
 } = require("./app/helper/vehicleSchemaValidation");
+const shipperCltr = require("./app/controller/shipperCltr");
+const addLoadValidation = require("./app/helper/addLoadValidation");
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -65,6 +67,16 @@ app.post(
 );
 
 app.get("/api/vehicleTypes", authenticateUser, ownersCltr.vehicleTypeList);
+
+// shipper's end points
+
+app.post(
+  "/api/addloads",
+  authenticateUser,
+  authorizeUser(["shipper"]),
+  checkSchema(addLoadValidation),
+  shipperCltr.create
+);
 
 app.listen(port, () => {
   console.log("server running at port", port);
