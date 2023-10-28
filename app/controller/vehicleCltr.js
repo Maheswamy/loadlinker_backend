@@ -6,9 +6,9 @@ const { validationResult } = require("express-validator");
 const Vehicle = require("../models/vehicle-model");
 const Enquiry = require("../models/enquiry-model");
 
-const ownersCltr = {};
+const vehicleCltr = {};
 
-ownersCltr.addVehicle = async (req, res) => {
+vehicleCltr.addVehicle = async (req, res) => {
   const body = _.pick(req.body, [
     "vehicleNumber",
     "rcNumber",
@@ -51,7 +51,7 @@ ownersCltr.addVehicle = async (req, res) => {
   }
 };
 
-ownersCltr.addVehicleType = async (req, res) => {
+vehicleCltr.addVehicleType = async (req, res) => {
   const body = _.pick(req.body, ["maximumWeight", "name", "code"]);
   try {
     const newTypeVehicle = await new VehicleType(body).save();
@@ -64,7 +64,7 @@ ownersCltr.addVehicleType = async (req, res) => {
   }
 };
 
-ownersCltr.vehicleTypeList = async (req, res) => {
+vehicleCltr.vehicleTypeList = async (req, res) => {
   try {
     const list = await VehicleType.find();
     res.json(list);
@@ -75,8 +75,4 @@ ownersCltr.vehicleTypeList = async (req, res) => {
 
 
 
-// owner updating the biding amount
-
-
-
-module.exports = ownersCltr;
+module.exports = vehicleCltr;

@@ -15,11 +15,11 @@ const {
   authenticateUser,
   authorizeUser,
 } = require("./app/middleware/userAuthorization");
-const ownersCltr = require("./app/controller/ownerCltr");
+const vehicleCltr = require("./app/controller/vehicleCltr");
 const {
   vehicleSchemaValidation,
 } = require("./app/helper/vehicleSchemaValidation");
-const shipperCltr = require("./app/controller/shipperCltr");
+const shippmentCltr = require("./app/controller/ShippmentCltr");
 const addLoadValidation = require("./app/helper/addLoadValidation");
 const bidingSchemaValidation = require("./app/helper/bidingSchemaValidation");
 const biddingCltr = require("./app/controller/bidingCltr");
@@ -58,17 +58,17 @@ app.post(
   authenticateUser,
   authorizeUser(["owner"]),
   checkSchema(vehicleSchemaValidation),
-  ownersCltr.addVehicle
+  vehicleCltr.addVehicle
 );
 
 app.post(
   "/api/vehicleTypes",
   authenticateUser,
   authorizeUser(["admin"]),
-  ownersCltr.addVehicleType
+  vehicleCltr.addVehicleType
 );
 
-app.get("/api/vehicleTypes", authenticateUser, ownersCltr.vehicleTypeList);
+app.get("/api/vehicleTypes", authenticateUser, vehicleCltr.vehicleTypeList);
 
 // shipper's end points
 
@@ -77,13 +77,13 @@ app.post(
   authenticateUser,
   authorizeUser(["shipper"]),
   checkSchema(addLoadValidation),
-  shipperCltr.create
+  shippmentCltr.create
 );
-app.get("/api/allLoads", authenticateUser, shipperCltr.allEnquiry);
+app.get("/api/allLoads", authenticateUser, shippmentCltr.allEnquiry);
 app.get(
   "/api/allLoads/:enquiryId",
   authenticateUser,
-  shipperCltr.singleEnquiry
+  shippmentCltr.singleEnquiry
 );
 
 // api for biding the amount for load

@@ -24,6 +24,10 @@ const enquirySchema = new Schema({
           ref: "Vehicle",
         },
         bidAmount: Number,
+        userId: {
+          type: Schema.Types.ObjectId,
+          ref: "User",
+        },
       },
     ],
   },
@@ -33,6 +37,9 @@ const enquirySchema = new Schema({
     enum: ["advance", "after shipment"],
   },
   distance: Number,
+  approximateTime: {
+    type: String,
+  },
   shipperId: {
     type: Schema.Types.ObjectId,
     ref: "User",

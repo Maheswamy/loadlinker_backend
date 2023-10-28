@@ -34,7 +34,6 @@ const bidingSchemaValidation = {
         console.log(value, req.params);
         const enquiry = await Enquiry.findById(req.params.enquiryLoadId);
         const result = enquiry.bids.find((ele) => ele.vehicleId == value);
-        console.log(result, "jlk");
         if (result) {
           throw new Error("you already bided to this enquiry");
         } else {
@@ -44,5 +43,7 @@ const bidingSchemaValidation = {
     },
   },
 };
+
+
 
 module.exports = bidingSchemaValidation;

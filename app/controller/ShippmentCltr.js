@@ -7,9 +7,31 @@ const {
   calculateDistance,
 } = require("../helper/addressToCoordinate");
 
-const shipperCltr = {};
+const shippmentCltr = {};
 
-shipperCltr.create = async (req, res) => {
+function millisecondsToReadableTime(milliseconds) {
+  const seconds = Math.floor((milliseconds / 1000) % 60);
+  const minutes = Math.floor((milliseconds / (1000 * 60)) % 60);
+  const hours = Math.floor((milliseconds / (1000 * 60 * 60)) % 24);
+  const days = Math.floor(milliseconds / (1000 * 60 * 60 * 24));
+
+  const parts = [];
+  if (days > 0) {
+    parts.push(days + (days === 1 ? " day" : " days"));
+  }
+  if (hours > 0) {
+    parts.push(hours + (hours === 1 ? " hour" : " hours"));
+  }
+  if (minutes > 0) {
+    parts.push(minutes + (minutes === 1 ? " minute" : " minutes"));
+  }
+  if (seconds > 0) {
+    parts.push(seconds + (seconds === 1 ? " second" : " seconds"));
+  }
+  return parts.join(", ");
+}
+
+shippmentCltr.create = async (req, res) => {
   const body = _.pick(req.body, [
     "loadType",
     "loadWeight",
@@ -44,6 +66,8 @@ shipperCltr.create = async (req, res) => {
       [body.unloadLocation.lng, body.unloadLocation.lat],
     ]);
     body.distance = distance.paths[0].distance / 1000;
+    const approximateTime = distance.paths[0].time;
+    body.approximateTime = millisecondsToReadableTime(approximateTime);
     body.shipperId = req.user.id;
     const newLoad = await new Enquiry(body).save();
 
@@ -53,7 +77,7 @@ shipperCltr.create = async (req, res) => {
   }
 };
 
-shipperCltr.allEnquiry = async (req, res) => {
+shippmentCltr.allEnquiry = async (req, res) => {
   try {
     const allEnquiry = await Enquiry.find();
     res.json(allEnquiry);
@@ -61,7 +85,7 @@ shipperCltr.allEnquiry = async (req, res) => {
     res.status(500).json(e);
   }
 };
-shipperCltr.singleEnquiry = async (req, res) => {
+shippmentCltr.singleEnquiry = async (req, res) => {
   const id = req.params.enquiryId;
   try {
     const allEnquiry = await Enquiry.findById(id);
@@ -70,4 +94,4 @@ shipperCltr.singleEnquiry = async (req, res) => {
     res.status(500).json(e);
   }
 };
-module.exports = shipperCltr;
+module.exports = shippmentCltr;
