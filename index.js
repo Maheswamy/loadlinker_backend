@@ -10,18 +10,16 @@ const {
   otpResendValidation,
   loginSchemaValidation,
   otpVerificationSchema,
-} = require("./app/helper/registerSchemaValidation");
+} = require("./app/helper/users-validation");
 const {
   authenticateUser,
   authorizeUser,
 } = require("./app/middleware/userAuthorization");
 const vehicleCltr = require("./app/controller/vehicleCltr");
-const {
-  vehicleSchemaValidation,
-} = require("./app/helper/vehicleSchemaValidation");
+const { vehicleSchemaValidation } = require("./app/helper/vehicle-validation");
 const shippmentCltr = require("./app/controller/ShippmentCltr");
-const addLoadValidation = require("./app/helper/addLoadValidation");
-const bidingSchemaValidation = require("./app/helper/bidingSchemaValidation");
+const addLoadValidation = require("./app/helper/shippment-validation");
+const bidingSchemaValidation = require("./app/helper/bid-validation");
 const biddingCltr = require("./app/controller/bidingCltr");
 const app = express();
 app.use(express.json());
