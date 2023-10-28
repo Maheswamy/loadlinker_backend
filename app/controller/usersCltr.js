@@ -129,10 +129,17 @@ usersCltr.login = async (req, res) => {
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    const user = await User.findOne({$or:[{ email: body.username }, {mobileNumber: body.username  }]});
-    
+    const user = await User.findOne({
+      $or: [{ email: body.username }, { mobileNumber: body.username }],
+    });
+
     if (!user) {
       return res.status(400).json({ errors: "invalid username or password" });
+    }
+    if (!user.isVerified) {
+      return res
+        .status(400)
+        .json({ error: "please verify account before login" });
     }
     const result = await bcryptjs.compare(body.password, user.password);
     if (!result) {

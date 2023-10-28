@@ -52,7 +52,7 @@ vehicleCltr.addVehicle = async (req, res) => {
 };
 
 vehicleCltr.addVehicleType = async (req, res) => {
-  const body = _.pick(req.body, ["maximumWeight", "name", "code"]);
+  const body = _.pick(req.body, ["maximumWeight", "name", "code",'pricePerKiloMeter','range','type']);
   try {
     const newTypeVehicle = await new VehicleType(body).save();
     res.json({
@@ -72,7 +72,5 @@ vehicleCltr.vehicleTypeList = async (req, res) => {
     res.status(500).json(e);
   }
 };
-
-
 
 module.exports = vehicleCltr;

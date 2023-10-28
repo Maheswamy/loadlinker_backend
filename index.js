@@ -19,7 +19,10 @@ const vehicleCltr = require("./app/controller/vehicleCltr");
 const { vehicleSchemaValidation } = require("./app/helper/vehicle-validation");
 const shippmentCltr = require("./app/controller/ShippmentCltr");
 const addLoadValidation = require("./app/helper/shippment-validation");
-const bidingSchemaValidation = require("./app/helper/bid-validation");
+const {
+  bidingSchemaValidation,
+  bidRemoveValidation,
+} = require("./app/helper/bid-validation");
 const biddingCltr = require("./app/controller/bidingCltr");
 const app = express();
 app.use(express.json());
@@ -77,9 +80,9 @@ app.post(
   checkSchema(addLoadValidation),
   shippmentCltr.create
 );
-app.get("/api/allLoads", authenticateUser, shippmentCltr.allEnquiry);
+app.get("/api/marketplace", authenticateUser, shippmentCltr.allEnquiry);
 app.get(
-  "/api/allLoads/:enquiryId",
+  "/api/marketplace/:enquiryId",
   authenticateUser,
   shippmentCltr.singleEnquiry
 );
@@ -87,7 +90,7 @@ app.get(
 // api for biding the amount for load
 
 app.post(
-  "/api/biding/:enquiryLoadId",
+  "/api/bidding/:enquiryLoadId",
   authenticateUser,
   authorizeUser(["owner"]),
   checkSchema(bidingSchemaValidation),
@@ -97,10 +100,19 @@ app.post(
 // modifying the bid placed by owner of vehicle
 
 app.put(
-  "/api/biding/:enquiryLoadId/:bidId",
+  "/api/bidding/:enquiryLoadId/:bidId",
   authenticateUser,
   authorizeUser(["owner"]),
+  checkSchema(bidRemoveValidation),
   biddingCltr.update
+);
+
+app.delete(
+  "/api/bidding/:enquiryLoadId/:bidId",
+  authenticateUser,
+  authorizeUser(["owner"]),
+  checkSchema(bidRemoveValidation),
+  biddingCltr.remove
 );
 
 app.listen(port, () => {

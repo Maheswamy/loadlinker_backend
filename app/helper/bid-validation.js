@@ -44,6 +44,27 @@ const bidingSchemaValidation = {
   },
 };
 
+const bidRemoveValidation = {
+  enquiryLoadId: {
+    in: ["params"],
+    notEmpty: {
+      errorMessage: "enquiry id is required",
+      bail: true,
+    },
+    isMongoId: {
+      errorMessage: "invalid mongo id",
+    },
+  },
+  bidId: {
+    in: ["params"],
+    notEmpty: {
+      errorMessage: "enquiry id is required",
+      bail: true,
+    },
+    isMongoId: {
+      errorMessage: "invalid mongo id",
+    },
+  },
+};
 
-
-module.exports = bidingSchemaValidation;
+module.exports = { bidingSchemaValidation, bidRemoveValidation };

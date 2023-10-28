@@ -33,6 +33,9 @@ biddingCltr.update = async (req, res) => {
   const body = _.pick(req.body, ["bidAmount", "vehicleId"]);
   const errors = validationResult(req);
   try {
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
     const enquiry = await Enquiry.findById(enquiryLoadId);
     if (!enquiry) {
       return res.status(404).json({ message: "Enquiry not found" });
@@ -47,6 +50,27 @@ biddingCltr.update = async (req, res) => {
     const updatedEnquiry = await enquiry.save();
     console.log(updatedEnquiry);
     res.json({ message: "BidAmount updated", updatedEnquiry });
+  } catch (e) {
+    res.status(500).json(e);
+  }
+};
+
+biddingCltr.remove = async (req, res) => {
+  const enquiryLoadId = req.params.enquiryLoadId;
+  const bidId = req.params.bidId;
+  const userId = req.user.id;
+  const errors = validationResult(req);
+  console.log(errors)
+  try {
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    const removedBid = await Enquiry.findByIdAndUpdate(
+      enquiryLoadId,
+      { $pull: { bids: { _id: bidId, userId: userId } } },
+      { new: true }
+    );
+    res.json(removedBid);
   } catch (e) {
     res.status(500).json(e);
   }

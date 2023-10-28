@@ -30,7 +30,12 @@ const userSchema = new Schema(
       default: false,
       enum: [true, false],
     },
+    vehicles: {
+      type: Schema.Types.ObjectId,
+      ref: "Vehicle",
+    },
   },
+
   { timestamps: true }
 );
 

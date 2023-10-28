@@ -1,3 +1,4 @@
+const { isEmpty } = require("lodash");
 const Vehicle = require("../models/vehicle-model");
 
 const vehicleSchemaValidation = {
@@ -54,15 +55,22 @@ const vehicleSchemaValidation = {
   vehiclePhoto: {
     custom: {
       options: (value, { req }) => {
-        if (req.files.rc.length == 0 || req.files.rc.length > 2) {
-          throw new Error(
-            "front and back image of RC of vehicle only required"
-          );
-        } else if (
-          req.files.vehicleImage.length == 0 ||
-          req.files.vehicleImage.length > 5
-        ) {
-          throw new Error("maximum of 5 images of vehicle is enough ");
+        console.log(typeof req.files);
+        if (isEmpty(req.files)) {
+          throw new Error("no images found");
+        }
+        if (isEmpty(req.files.rc)) {
+          throw new Error("no rc images found");
+        }
+        if (req.files.rc.length > 2) {
+          throw new Error("only front and back image of RC is required");
+        }
+
+        if (isEmpty(req.files.vehicleImage)) {
+          throw new Error("vehicle images not found");
+        }
+        if (req.files.rc.length > 5) {
+          throw new Error("only five images of vehicle is enough");
         } else {
           return true;
         }
