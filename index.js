@@ -21,6 +21,7 @@ const shippmentCltr = require("./app/controller/ShippmentCltr");
 const addLoadValidation = require("./app/helper/shippment-validation");
 const {
   bidingSchemaValidation,
+  bidUpdateValidation,
   bidRemoveValidation,
 } = require("./app/helper/bid-validation");
 const biddingCltr = require("./app/controller/bidingCltr");
@@ -28,9 +29,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 const port = process.env.PORT || 3300;
-
 dbConfig();
-
 const upload = multer();
 
 app.post(
@@ -90,7 +89,7 @@ app.get(
 // api for biding the amount for load
 
 app.post(
-  "/api/bidding/:enquiryLoadId",
+  "/api/bids",
   authenticateUser,
   authorizeUser(["owner"]),
   checkSchema(bidingSchemaValidation),
@@ -100,10 +99,10 @@ app.post(
 // modifying the bid placed by owner of vehicle
 
 app.put(
-  "/api/bidding/:enquiryLoadId/:bidId",
+  "/api/bids/:bidId",
   authenticateUser,
   authorizeUser(["owner"]),
-  checkSchema(bidRemoveValidation),
+  checkSchema(bidUpdateValidation),
   biddingCltr.update
 );
 

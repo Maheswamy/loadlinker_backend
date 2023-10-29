@@ -1,10 +1,10 @@
+const Bid = require("../models/bid-model");
 const Enquiry = require("../models/enquiry-model");
 
 const bidingSchemaValidation = {
-  enquiryLoadId: {
-    in: ["params"],
+  enquiryId: {
     notEmpty: {
-      errorMessage: "Load Id is required",
+      errorMessage: "Enquiry Id is required",
       bail: true,
     },
     isMongoId: {
@@ -13,11 +13,11 @@ const bidingSchemaValidation = {
   },
   bidAmount: {
     notEmpty: {
-      errorMessage: "biding amount  is required",
+      errorMessage: "bidding amount is required",
       bail: true,
     },
     isNumeric: {
-      errorMessage: "bising amount should be in digit",
+      errorMessage: "bidding amount should be in digit",
     },
   },
   vehicleId: {
@@ -31,11 +31,13 @@ const bidingSchemaValidation = {
     },
     custom: {
       options: async (value, { req, res }) => {
-        console.log(value, req.params);
-        const enquiry = await Enquiry.findById(req.params.enquiryLoadId);
-        const result = enquiry.bids.find((ele) => ele.vehicleId == value);
-        if (result) {
-          throw new Error("you already bided to this enquiry");
+        const bid = await Bid.findOne({
+          vehicleId: value,
+          enquiryId: req.body.enquiryId,
+          userId: req.user.id,
+        });
+        if (bid) {
+          throw new Error("use already bidded to this Enquiry");
         } else {
           return true;
         }
@@ -44,9 +46,30 @@ const bidingSchemaValidation = {
   },
 };
 
+const bidUpdateValidation = {
+  bidId: {
+    in: ["params"],
+    notEmpty: {
+      errorMessage: "bid id is required",
+      bail: true,
+    },
+    isMongoId: {
+      errorMessage: "invalid mongo id",
+    },
+  },
+  bidAmount: {
+    notEmpty: {
+      errorMessage: "bidding amount is required",
+      bail: true,
+    },
+    isNumeric: {
+      errorMessage: "bidding amount should be in digit",
+    },
+  },
+};
+
 const bidRemoveValidation = {
   enquiryLoadId: {
-    in: ["params"],
     notEmpty: {
       errorMessage: "enquiry id is required",
       bail: true,
@@ -56,7 +79,6 @@ const bidRemoveValidation = {
     },
   },
   bidId: {
-    in: ["params"],
     notEmpty: {
       errorMessage: "enquiry id is required",
       bail: true,
@@ -67,4 +89,4 @@ const bidRemoveValidation = {
   },
 };
 
-module.exports = { bidingSchemaValidation, bidRemoveValidation };
+module.exports = { bidingSchemaValidation, bidUpdateValidation,bidRemoveValidation };

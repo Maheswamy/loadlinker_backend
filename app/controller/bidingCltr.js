@@ -1,22 +1,30 @@
 const { validationResult } = require("express-validator");
 const Enquiry = require("../models/enquiry-model");
 const _ = require("lodash");
+const Bid = require("../models/bid-model");
+const Vehicle = require("../models/vehicle-model");
 const biddingCltr = {};
 
 // owner bidding his best price to enquiry post of load
 
 biddingCltr.create = async (req, res) => {
-  const enquiryLoadId = req.params.enquiryLoadId;
-  const body = _.pick(req.body, ["bidAmount", "vehicleId"]);
+  const body = _.pick(req.body, ["bidAmount", "vehicleId", "enquiryId"]);
   const errors = validationResult(req);
   try {
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
     body.userId = req.user.id;
-    const newBid = await Enquiry.findByIdAndUpdate(
-      enquiryLoadId,
-      { $push: { bids: body } },
+    const vehicleApprove = await Vehicle.findById(body.vehicleId);
+    if (!vehicleApprove.isVerified) {
+      return res.status(401).json({ message: "vehicle not approved" });
+    }
+    const newBid = await new Bid(body).save();
+    const addBid = await Enquiry.findByIdAndUpdate(
+      newBid.enquiryId,
+      {
+        $push: { bids: newBid._id },
+      },
       { new: true }
     );
     res.json({ message: "new bid added", newBid });
@@ -28,28 +36,27 @@ biddingCltr.create = async (req, res) => {
 // owner modifying the bid already placed
 
 biddingCltr.update = async (req, res) => {
-  const enquiryLoadId = req.params.enquiryLoadId;
   const bidId = req.params.bidId;
-  const body = _.pick(req.body, ["bidAmount", "vehicleId"]);
+  const body = _.pick(req.body, ["bidAmount"]);
+  const userId = req.user.id;
   const errors = validationResult(req);
   try {
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    const enquiry = await Enquiry.findById(enquiryLoadId);
-    if (!enquiry) {
-      return res.status(404).json({ message: "Enquiry not found" });
-    }
-    const bidIndex = enquiry.bids.findIndex(
-      (ele) => ele._id == bidId && ele.userId == req.user.id
+    console.log(bidId);
+    const updatedBid = await Bid.findOneAndUpdate(
+      { _id: bidId, userId: userId },
+      body,
+      { new: true }
     );
-    if (bidIndex == -1) {
-      return res.status(404).json({ error: "nobid found to update" });
+
+    if (!updatedBid) {
+      return res
+        .status(404)
+        .json({ message: "you have not bid for this enquiry" });
     }
-    enquiry.bids[bidIndex].bidAmount = body.bidAmount;
-    const updatedEnquiry = await enquiry.save();
-    console.log(updatedEnquiry);
-    res.json({ message: "BidAmount updated", updatedEnquiry });
+    res.json(updatedBid);
   } catch (e) {
     res.status(500).json(e);
   }
@@ -60,7 +67,7 @@ biddingCltr.remove = async (req, res) => {
   const bidId = req.params.bidId;
   const userId = req.user.id;
   const errors = validationResult(req);
-  console.log(errors)
+  console.log(errors);
   try {
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });

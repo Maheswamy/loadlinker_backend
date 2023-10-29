@@ -17,19 +17,10 @@ const enquirySchema = new Schema({
     lng: String,
   },
   bids: {
-    type: [
-      {
-        vehicleId: {
-          type: Schema.Types.ObjectId,
-          ref: "Vehicle",
-        },
-        bidAmount: Number,
-        userId: {
-          type: Schema.Types.ObjectId,
-          ref: "User",
-        },
-      },
-    ],
+    type: [{
+      type: Schema.Types.ObjectId,
+      ref: "Bid",
+    }],
   },
   amount: Number,
   paymentType: {

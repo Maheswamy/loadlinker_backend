@@ -12,7 +12,7 @@ const vehicleSchema = new Schema(
       ref: "VehicleModel",
     },
     vehicleImages: [{ url: String, key: String }],
-    status: {
+    isVerified: {
       type: String,
       default: "pending",
       enum: ["reject", "pending", "approved"],
