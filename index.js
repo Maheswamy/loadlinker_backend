@@ -25,6 +25,7 @@ const {
   bidRemoveValidation,
 } = require("./app/helper/bid-validation");
 const biddingCltr = require("./app/controller/bidingCltr");
+const permitValidation = require("./app/helper/permitValidation");
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -112,6 +113,14 @@ app.delete(
   authorizeUser(["owner"]),
   checkSchema(bidRemoveValidation),
   biddingCltr.remove
+);
+
+app.post(
+  "/api/vehicles/permit",
+  authenticateUser,
+  authorizeUser(["admin"]),
+  checkSchema(permitValidation),
+  vehicleCltr.addPermit
 );
 
 app.listen(port, () => {

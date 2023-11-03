@@ -5,6 +5,7 @@ const VehicleType = require("../models/vehicleType-model");
 const { validationResult } = require("express-validator");
 const Vehicle = require("../models/vehicle-model");
 const Enquiry = require("../models/enquiry-model");
+const Permit = require("../models/permit-model");
 
 const vehicleCltr = {};
 
@@ -52,7 +53,14 @@ vehicleCltr.addVehicle = async (req, res) => {
 };
 
 vehicleCltr.addVehicleType = async (req, res) => {
-  const body = _.pick(req.body, ["maximumWeight", "name", "code",'pricePerKiloMeter','range','type']);
+  const body = _.pick(req.body, [
+    "maximumWeight",
+    "name",
+    "code",
+    "pricePerKiloMeter",
+    "range",
+    "type",
+  ]);
   try {
     const newTypeVehicle = await new VehicleType(body).save();
     res.json({
@@ -70,6 +78,21 @@ vehicleCltr.vehicleTypeList = async (req, res) => {
     res.json(list);
   } catch (e) {
     res.status(500).json(e);
+  }
+};
+
+vehicleCltr.addPermit = async (req, res) => {
+  const body = _.pick(req.body, ["state"]);
+  const errors = validationResult(req);
+
+  try {
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    const newPermit = await new Permit(body).save();
+    res.json({ message: `permit of ${newPermit.state} is created ` });
+  } catch (e) {
+    res.json(e);
   }
 };
 
