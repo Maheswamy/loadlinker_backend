@@ -18,6 +18,7 @@ const generateOTP = () => {
   return otp;
 };
 
+// user reisteration controller
 usersCltr.register = async (req, res) => {
   const body = _.pick(req.body, [
     "firstName",
@@ -100,7 +101,7 @@ usersCltr.resendOtp = async (req, res) => {
 };
 
 usersCltr.otpVerification = async (req, res) => {
-  const body = _.pick(req.body, ["otp", "email"]);
+  const body = _.pick(req.body, ["otp","email"]);
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

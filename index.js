@@ -35,28 +35,34 @@ const port = process.env.PORT || 3300;
 dbConfig();
 const upload = multer();
 
+//register end point
 app.post(
   "/api/register",
   checkSchema(registerSchemaValidation),
   usersCltr.register
 );
 
+//OTP resend end point
 app.get(
   "/api/register/otp",
   checkSchema(otpResendValidation),
   usersCltr.resendOtp
 );
+
+// OTP verification end point
 app.post(
   "/api/register/otp",
   checkSchema(otpVerificationSchema),
   usersCltr.otpVerification
 );
+
 app.post("/api/login", checkSchema(loginSchemaValidation), usersCltr.login);
 
 app.get("/api/users/profile", authenticateUser, usersCltr.profile);
 
+// add vehicle end point
 app.post(
-  "/api/addvehicles",
+  "/api/vehicles",
   upload.fields([{ name: "vehicleImage" }, { name: "rc" }]),
   authenticateUser,
   authorizeUser(["owner"]),

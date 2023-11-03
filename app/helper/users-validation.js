@@ -1,43 +1,35 @@
 const User = require("../models/user-model");
 // const {isEmail,isMobilePhone} = require('validator');
 
+//not empty function
+
+const notEmptyGenrator = (value) => {
+  return {
+    errorMessage: `${value} is required`,
+    bail: true,
+  };
+};
+
 const firstName = {
-  notEmpty: {
-    errorMessage: "Please enter the First Name",
-  },
+  notEmpty: notEmptyGenrator("First Name"),
 };
 
 const password = {
-  notEmpty: {
-    errorMessage: "password can be empty",
-  },
-  isLength: {
-    options: {
-      min: 8,
-    },
-    errorMessage: "password should be with in 8 to 128 character",
-  },
+  notEmpty: notEmptyGenrator("password"),
   isStrongPassword: {
-    options: {
-      minLowercase: 1,
-      minUppercase: 1,
-      minNumbers: 1,
-      minSymbols: 1,
-    },
     errorMessage:
-      "password should contain minimum one lowercase , one uppercase, one Number and one Symsbol",
+      "password should contain min 8 to max 128 characters with one lowercase , one uppercase, one Number and one Symsbol",
   },
 };
 
 const email = {
-  notEmpty: {
-    errorMessage: "email cannot be empty",
-  },
+  notEmpty: notEmptyGenrator("Email"),
   isEmail: {
     errorMessage: "invalid email id",
+    bail: true,
   },
   custom: {
-    options: async (value, { req, res }) => {
+    options: async (value) => {
       try {
         const user = await User.findOne({ email: value });
         if (!user) {
@@ -53,14 +45,13 @@ const email = {
 };
 
 const otpEmail = {
-  notEmpty: {
-    errorMessage: "email cannot be empty",
-  },
+  notEmpty: notEmptyGenrator("Otp email"),
   isEmail: {
     errorMessage: "invalid email id",
+    bail: true,
   },
   custom: {
-    options: async (value, { req, res }) => {
+    options: async (value) => {
       try {
         const user = await User.findOne({ email: value });
         if (user) {
@@ -76,14 +67,14 @@ const otpEmail = {
 };
 
 const mobileNumber = {
-  notEmpty: {
-    errorMessage: "mobile number cannot be empty",
-  },
+  notEmpty: notEmptyGenrator("mobile number"),
   isAlphanumeric: {
     errorMessage: "please enter only digits",
+    bail: true,
   },
   isMobilePhone: {
     errorMessage: "invalid mobile number",
+    bail: true,
   },
   custom: {
     options: async (value) => {
@@ -102,19 +93,10 @@ const mobileNumber = {
 };
 
 const role = {
-  notEmpty: {
-    errorMessage: "please select which type of User your are ",
-  },
-  custom: {
-    options: (value) => {
-      const roles = ["owner", "shipper"];
-      const result = roles.find((ele) => ele === value);
-      if (!result) {
-        throw new Error("invalid user type");
-      } else {
-        return true;
-      }
-    },
+  notEmpty: notEmptyGenrator("Role"),
+  isIn: {
+    options: [["owner", "shipper"]],
+    errorMessage: "Role should be either Owner or Shipper",
   },
 };
 const registerSchemaValidation = {
@@ -157,15 +139,14 @@ const loginSchemaValidation = {
 
 const otpVerificationSchema = {
   otp: {
-    notEmpty: {
-      errorMessage: "OTP cannot be empty",
-    },
+    notEmpty: notEmptyGenrator("OTP"),
     isLength: {
       options: {
         min: 6,
         max: 6,
       },
       errorMessage: "OTP should be 6 digit",
+      bail: true,
     },
   },
   email: otpEmail,
