@@ -1,4 +1,5 @@
 const { isEmpty } = require("lodash");
+const { isMongoId } = require("validator");
 const Vehicle = require("../models/vehicle-model");
 
 const vehicleSchemaValidation = {
@@ -34,6 +35,31 @@ const vehicleSchemaValidation = {
       },
     },
   },
+  permit: {
+    notEmpty: {
+      errorMessage: "permit is required",
+      bail: true,
+    },
+    isArray: {
+      options: {
+        min: 1,
+        max: 27,
+      },
+      errorMessage: "min one permitt is required",
+      bail: true,
+    },
+    custom: {
+      options: (value) => {
+        const result = value.every((ele) => isMongoId(ele));
+        if (result) {
+          return true;
+        } else {
+          throw new Error("array should only consist valid MongoID");
+        }
+      },
+    },
+  },
+
   permittedLoadCapacity: {
     notEmpty: {
       errorMessage: "maximum load capacity of vehicle needed",

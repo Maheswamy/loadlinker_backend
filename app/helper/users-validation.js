@@ -140,19 +140,19 @@ const loginSchemaValidation = {
       errorMessage: "password cannot be empty",
     },
   },
-  // custom: {
-  //   options: async (value) => {
-  //     const validator = require("validator");
-  //     if (
-  //       validator.isEmail(value) ||
-  //       validator.isMobilePhone(value, "any", { strictMode: false })
-  //     ) {
-  //       return true;
-  //     } else {
-  //       throw new Error("Invalid email or mobile number ");
-  //     }
-  //   },
-  // },
+  custom: {
+    options: async (value) => {
+      const validator = require("validator");
+      if (
+        validator.isEmail(value) ||
+        validator.isMobilePhone(value, "any", { strictMode: false })
+      ) {
+        return true;
+      } else {
+        throw new Error("Invalid email or mobile number ");
+      }
+    },
+  },
 };
 
 const otpVerificationSchema = {

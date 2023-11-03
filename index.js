@@ -17,7 +17,7 @@ const {
 } = require("./app/middleware/userAuthorization");
 const vehicleCltr = require("./app/controller/vehicleCltr");
 const { vehicleSchemaValidation } = require("./app/helper/vehicle-validation");
-const shippmentCltr = require("./app/controller/ShippmentCltr");
+const enquiryCltr = require("./app/controller/enquiryCltr");
 const addLoadValidation = require("./app/helper/shippment-validation");
 const {
   bidingSchemaValidation,
@@ -26,6 +26,8 @@ const {
 } = require("./app/helper/bid-validation");
 const biddingCltr = require("./app/controller/bidingCltr");
 const permitValidation = require("./app/helper/permitValidation");
+const shipmentCltr = require("./app/controller/shipmentCltr");
+const shipmentValidation = require("./app/helper/shipmentValidation");
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -78,13 +80,13 @@ app.post(
   authenticateUser,
   authorizeUser(["shipper"]),
   checkSchema(addLoadValidation),
-  shippmentCltr.create
+  enquiryCltr.create
 );
-app.get("/api/marketplace", authenticateUser, shippmentCltr.allEnquiry);
+app.get("/api/marketplace", authenticateUser, enquiryCltr.allEnquiry);
 app.get(
   "/api/marketplace/:enquiryId",
   authenticateUser,
-  shippmentCltr.singleEnquiry
+  enquiryCltr.singleEnquiry
 );
 
 // api for biding the amount for load
@@ -121,6 +123,16 @@ app.post(
   authorizeUser(["admin"]),
   checkSchema(permitValidation),
   vehicleCltr.addPermit
+);
+
+// shipment approve api
+
+app.post(
+  "/api/shipments/:enquiryId",
+  authenticateUser,
+  authorizeUser(["shipper", "admin"]),
+  checkSchema(shipmentValidation),
+  shipmentCltr.approve
 );
 
 app.listen(port, () => {

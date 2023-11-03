@@ -14,6 +14,7 @@ biddingCltr.create = async (req, res) => {
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
+    
     body.userId = req.user.id;
     const vehicleApprove = await Vehicle.findById(body.vehicleId);
     if (!vehicleApprove.isVerified) {

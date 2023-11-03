@@ -15,6 +15,7 @@ vehicleCltr.addVehicle = async (req, res) => {
     "rcNumber",
     "permittedLoadCapacity",
     "vehicalType",
+    'permit'
   ]);
 
   try {

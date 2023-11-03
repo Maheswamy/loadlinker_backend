@@ -11,6 +11,10 @@ const vehicleSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "VehicleModel",
     },
+    permit: {
+      type: [Schema.Types.ObjectId],
+      ref: "Permit",
+    },
     vehicleImages: [{ url: String, key: String }],
     isVerified: {
       type: String,

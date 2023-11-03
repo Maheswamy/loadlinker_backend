@@ -7,7 +7,7 @@ const {
   calculateDistance,
 } = require("../helper/addressToCoordinate");
 
-const shippmentCltr = {};
+const enquiryCltr = {};
 
 function millisecondsToReadableTime(milliseconds) {
   const seconds = Math.floor((milliseconds / 1000) % 60);
@@ -31,7 +31,7 @@ function millisecondsToReadableTime(milliseconds) {
   return parts.join(", ");
 }
 
-shippmentCltr.create = async (req, res) => {
+enquiryCltr.create = async (req, res) => {
   const body = _.pick(req.body, [
     "loadType",
     "loadWeight",
@@ -77,7 +77,7 @@ shippmentCltr.create = async (req, res) => {
   }
 };
 
-shippmentCltr.allEnquiry = async (req, res) => {
+enquiryCltr.allEnquiry = async (req, res) => {
   try {
     const allEnquiry = await Enquiry.find();
     res.json(allEnquiry);
@@ -85,7 +85,7 @@ shippmentCltr.allEnquiry = async (req, res) => {
     res.status(500).json(e);
   }
 };
-shippmentCltr.singleEnquiry = async (req, res) => {
+enquiryCltr.singleEnquiry = async (req, res) => {
   const id = req.params.enquiryId;
   try {
     const allEnquiry = await Enquiry.findById(id);
@@ -94,4 +94,6 @@ shippmentCltr.singleEnquiry = async (req, res) => {
     res.status(500).json(e);
   }
 };
-module.exports = shippmentCltr;
+module.exports = enquiryCltr;
+
+
