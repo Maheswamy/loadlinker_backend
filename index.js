@@ -60,15 +60,18 @@ app.post("/api/login", checkSchema(loginSchemaValidation), usersCltr.login);
 
 app.get("/api/users/profile", authenticateUser, usersCltr.profile);
 
-// add vehicle end point
+// add vehicle end point for owner and admin
 app.post(
   "/api/vehicles",
   upload.fields([{ name: "vehicleImage" }, { name: "rc" }]),
   authenticateUser,
-  authorizeUser(["owner"]),
+  authorizeUser(["owner","admin"]),
   checkSchema(vehicleSchemaValidation),
   vehicleCltr.addVehicle
 );
+
+
+
 
 app.post(
   "/api/vehicleTypes",

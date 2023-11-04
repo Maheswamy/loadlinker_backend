@@ -1,45 +1,38 @@
 const { isEmpty } = require("lodash");
 const { isMongoId } = require("validator");
 const Vehicle = require("../models/vehicle-model");
+const { notEmptyGenrator } = require("./users-validation");
+
+const findVehicleExists = async (value) => {
+  const vehicle = await Vehicle.findOne({
+    $or: [{ vehicleNumber: value }, { rcNumber: value }],
+  });
+  if (vehicle) {
+    throw new Error("vehicle  already exists");
+  } else {
+    return true;
+  }
+};
 
 const vehicleSchemaValidation = {
   vehicleNumber: {
-    notEmpty: {
-      errorMessage: "please enter the Vehicle number",
-      bail: true,
-    },
+    notEmpty: notEmptyGenrator("vehicle number "),
     custom: {
-      options: async (value) => {
-        const vehicle = await Vehicle.findOne({ vehicleNumber: value });
-        if (vehicle) {
-          throw new Error("vehicle already exists");
-        } else {
-          return true;
-        }
+      options: (value) => {
+        return findVehicleExists(value);
       },
     },
   },
   rcNumber: {
-    notEmpty: {
-      errorMessage: "please enter the Vehicle Registration Certificate number",
-      bail: true,
-    },
+    notEmpty: notEmptyGenrator("vehicle RC number "),
     custom: {
-      options: async (value) => {
-        const vehicle = await Vehicle.findOne({ rcNumber: value });
-        if (vehicle) {
-          throw new Error("vehicle  already exists");
-        } else {
-          return true;
-        }
+      options: (value) => {
+        return findVehicleExists(value);
       },
     },
   },
   permit: {
-    notEmpty: {
-      errorMessage: "permit is required",
-      bail: true,
-    },
+    notEmpty: notEmptyGenrator("vehicle Permit"),
     isArray: {
       options: {
         min: 1,
@@ -61,19 +54,13 @@ const vehicleSchemaValidation = {
   },
 
   permittedLoadCapacity: {
-    notEmpty: {
-      errorMessage: "maximum load capacity of vehicle needed",
-      bail: true,
-    },
+    notEmpty: notEmptyGenrator("maximum load capacity "),
     isNumeric: {
       errorMessage: "invalid format",
     },
   },
-  vehicalType: {
-    notEmpty: {
-      errorMessage: "vehicle type is required",
-      bail: true,
-    },
+  vehicleType: {
+    notEmpty: notEmptyGenrator("vehicle type"),
     isMongoId: {
       errorMessage: "invalid maongo id",
     },
@@ -81,7 +68,6 @@ const vehicleSchemaValidation = {
   vehiclePhoto: {
     custom: {
       options: (value, { req }) => {
-        console.log(typeof req.files);
         if (isEmpty(req.files)) {
           throw new Error("no images found");
         }

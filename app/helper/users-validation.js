@@ -157,4 +157,5 @@ module.exports = {
   otpResendValidation,
   loginSchemaValidation,
   otpVerificationSchema,
+  notEmptyGenrator
 };

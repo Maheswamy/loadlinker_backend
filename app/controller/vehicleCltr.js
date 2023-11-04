@@ -15,7 +15,7 @@ vehicleCltr.addVehicle = async (req, res) => {
     "rcNumber",
     "permittedLoadCapacity",
     "vehicalType",
-    'permit'
+    "permit",
   ]);
 
   try {
@@ -26,10 +26,9 @@ vehicleCltr.addVehicle = async (req, res) => {
 
     const { rc, vehicleImage } = req.files;
     const arrayBuffer = [...rc, ...vehicleImage];
-    const promises = arrayBuffer.map((ele) =>
-      uploadFileToS3(ele, ele.fieldname, req.user.id)
+    const allResolved = await Promise.all(
+      arrayBuffer.map((ele) => uploadFileToS3(ele, ele.fieldname, req.user.id))
     );
-    const allResolved = await Promise.all(promises);
     const splitImage = allResolved.reduce(
       (pv, cv) => {
         if (cv.Location.includes("vehicleImage")) {
@@ -46,7 +45,9 @@ vehicleCltr.addVehicle = async (req, res) => {
       (body.vehicleImages = splitImage.vehicleImages);
     body.OwnerId = req.user.id;
     const newVehicle = await new Vehicle(body).save();
-
+    await User.findByIdAndUpdate(req.user.id, {
+      $push: { vehicles: newVehicle._id },
+    });
     res.json(newVehicle);
   } catch (e) {
     res.status(500).json(e);
