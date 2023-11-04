@@ -29,7 +29,7 @@ const vehicleSchema = new Schema(
       type: Boolean,
       default: false,
     },
-    OwnerId: {
+    ownerId: {
       type: Schema.Types.ObjectId,
       ref: "User",
     },

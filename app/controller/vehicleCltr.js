@@ -9,6 +9,12 @@ const Permit = require("../models/permit-model");
 
 const vehicleCltr = {};
 
+// function that pick only required fileds array of objectss
+const requiredPick = (value, fields) => {
+  return value.map((ele) => _.pick(ele, fields));
+};
+
+//add vehicle
 vehicleCltr.addVehicle = async (req, res) => {
   const body = _.pick(req.body, [
     "vehicleNumber",
@@ -43,16 +49,72 @@ vehicleCltr.addVehicle = async (req, res) => {
 
     (body.rcImages = splitImage.rcImages),
       (body.vehicleImages = splitImage.vehicleImages);
-    body.OwnerId = req.user.id;
+    body.ownerId = req.user.id;
     const newVehicle = await new Vehicle(body).save();
     await User.findByIdAndUpdate(req.user.id, {
       $push: { vehicles: newVehicle._id },
     });
     res.json(newVehicle);
   } catch (e) {
-    res.status(500).json(e);
+    res.status(500).json(e.message);
   }
 };
+
+//vehicle list
+vehicleCltr.list = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const role = req.user.role;
+    const list = await Vehicle.find(
+      role === "admin" ? null : { ownerId: userId }
+    );
+    if (list.length == 0) {
+      return res.status(404).json({ error: "no vehicles found" });
+    }
+    const response = requiredPick(list, [
+      "_id",
+      "rcNumber",
+      "vehicleNumber",
+      "isVerified",
+    ]);
+    res.json(response);
+  } catch (e) {
+    res.status(500).json(e.message);
+  }
+};
+
+// single vehicle details
+
+vehicleCltr.singleVehicle = async (req, res) => {
+  const vehicleId = req.params.vehicleId;
+  const userId = req.user.id;
+  const role = req.user.role;
+  try {
+    const vehicle = await Vehicle.findOne(
+      role === "owner"
+        ? { ownerId: userId, _id: vehicleId }
+        : { _id: vehicleId }
+    );
+    if (!vehicle) {
+      return res.status(404).json({ error: "vehicle not found" });
+    }
+    res.json(vehicle);
+  } catch (e) {
+    res.status(500).json(e.message);
+  }
+};
+
+//vehicle details update
+
+vehicleCltr.update = async (req, res) => {
+  try {
+    res.json("hitted");
+  } catch (e) {
+    res.status(500).json(e.message);
+  }
+};
+
+// Vehicle type  section
 
 vehicleCltr.addVehicleType = async (req, res) => {
   const body = _.pick(req.body, [
@@ -70,7 +132,7 @@ vehicleCltr.addVehicleType = async (req, res) => {
       data: newTypeVehicle,
     });
   } catch (e) {
-    res.status(500).json(e);
+    res.status(500).json(e.message);
   }
 };
 
@@ -79,7 +141,7 @@ vehicleCltr.vehicleTypeList = async (req, res) => {
     const list = await VehicleType.find();
     res.json(list);
   } catch (e) {
-    res.status(500).json(e);
+    res.status(500).json(e.message);
   }
 };
 
@@ -94,7 +156,7 @@ vehicleCltr.addPermit = async (req, res) => {
     const newPermit = await new Permit(body).save();
     res.json({ message: `permit of ${newPermit.state} is created ` });
   } catch (e) {
-    res.json(e);
+    res.status(500).json(e.message);
   }
 };
 

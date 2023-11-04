@@ -60,18 +60,41 @@ app.post("/api/login", checkSchema(loginSchemaValidation), usersCltr.login);
 
 app.get("/api/users/profile", authenticateUser, usersCltr.profile);
 
+//vehicle api's
 // add vehicle end point for owner and admin
 app.post(
   "/api/vehicles",
   upload.fields([{ name: "vehicleImage" }, { name: "rc" }]),
   authenticateUser,
-  authorizeUser(["owner","admin"]),
+  authorizeUser(["owner", "admin"]),
   checkSchema(vehicleSchemaValidation),
   vehicleCltr.addVehicle
 );
 
+//all vehicle list
+app.get(
+  "/api/vehicles",
+  authenticateUser,
+  authorizeUser(["admin", "owner"]),
+  vehicleCltr.list
+);
 
+//single vehicle details
+app.get(
+  "/api/vehicles/:vehicleId",
+  authenticateUser,
+  authorizeUser(["admin", "owner"]),
+  vehicleCltr.singleVehicle
+);
 
+//vehicle details update
+
+app.put(
+  "/api/vehicles/:vehicleId",
+  authenticateUser,
+  authorizeUser(["admin", "owner"]),
+  vehicleCltr.update
+);
 
 app.post(
   "/api/vehicleTypes",
