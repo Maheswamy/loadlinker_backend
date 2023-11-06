@@ -1,5 +1,6 @@
 const Bid = require("../models/bid-model");
 const Enquiry = require("../models/enquiry-model");
+const Vehicle = require("../models/vehicle-model");
 
 const bidingSchemaValidation = {
   enquiryId: {
@@ -31,6 +32,27 @@ const bidingSchemaValidation = {
     },
     custom: {
       options: async (value, { req, res }) => {
+        const vehicle = await Vehicle.findOne({
+          _id: value,
+          ownerId: req.user.id,
+        });
+        const enquiry = await Enquiry.findById(req.body.enquiryId);
+        if (!vehicle) {
+          throw new Error("vehicle not present");
+        }
+        if (vehicle.isVerified !== "approved") {
+          throw new Error("vehicle not approved");
+        }
+        if (vehicle.loaded) {
+          throw new Error(
+            "vehicle is already loaded, you bid only after unload "
+          );
+        }
+        if (vehicle.permittedLoadCapacity < enquiry.loadWeight) {
+          throw new Error(
+            "maximum load capacity of your vehicle is less than Enquiy load"
+          );
+        }
         const bid = await Bid.findOne({
           vehicleId: value,
           enquiryId: req.body.enquiryId,
@@ -89,4 +111,8 @@ const bidRemoveValidation = {
   },
 };
 
-module.exports = { bidingSchemaValidation, bidUpdateValidation,bidRemoveValidation };
+module.exports = {
+  bidingSchemaValidation,
+  bidUpdateValidation,
+  bidRemoveValidation,
+};

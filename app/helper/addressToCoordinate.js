@@ -1,5 +1,12 @@
 const axios = require("axios");
 
+const addressPicker = async (fulladdress) => {
+  const { address, area, district, state, country, pin } = fulladdress;
+  return await addressToCoordinate(
+    `${area},${district},${state},${country},${pin}`
+  );
+};
+
 const addressToCoordinate = async (address) => {
   const query = new URLSearchParams({
     q: `${address}`,
@@ -16,9 +23,9 @@ const addressToCoordinate = async (address) => {
     const response = await axios.get(
       `https://graphhopper.com/api/1/geocode?${query}`
     );
-    return response.data;
+    return Object.values(response.data.hits[0].point).reverse();
   } catch (e) {
-    return e;
+    return e.message;
   }
 };
 
@@ -48,11 +55,10 @@ const calculateDistance = async (coordinates) => {
     );
 
     const data = resp.data;
-    console.log(data, "mhaneghj");
-    return data;
+    return { distance: data.paths[0].distance/1000, time: data.paths[0].time/1000 };
   } catch (error) {
-    return error;
+    return error.message;
   }
 };
 
-module.exports = { addressToCoordinate, calculateDistance };
+module.exports = { addressToCoordinate, calculateDistance, addressPicker };

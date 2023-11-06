@@ -12,27 +12,17 @@ const vehicleTypeSchema = new Schema(
         "Intermediate Commercial Vehicle",
         "Medium Commercial Vehicle",
         "Multi Axle Vehicle",
-        "Tractor Trailer",
       ],
     },
     pricePerKiloMeter: {
       type: Number,
-      enum: [15,18, 20, 24, 30, 35],
+      enum: [15, 18, 20, 24, 30],
     },
-    range: {
-      type: String,
-      enum: [
-        "8 Ton < GVW ≤ 16.02 Ton",
-        "Upto 3.5 Ton",
-        "18.5 Ton GVW",
-        "28 Ton < GVW ≤ 49 Ton",
-        "30 Ton < GCW ≤ 55 Ton",
-        "3.5 Ton < GVW ≤ 8 Ton",
-      ],
-    },
+    minimumWeight: Number,
+    maximumWeight: Number,
     code: {
       type: String,
-      enum: ["SCV", "LCV", "ICV", "MCV", "MAV", "TT"],
+      enum: ["SCV", "LCV", "ICV", "MCV", "MAV"],
     },
   },
   { timestamps: true }

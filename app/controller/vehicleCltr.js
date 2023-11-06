@@ -9,10 +9,12 @@ const Permit = require("../models/permit-model");
 
 const vehicleCltr = {};
 
-// function that pick only required fileds array of objectss
+// function that pick only required fileds in array of objects
 const requiredPick = (value, fields) => {
   return value.map((ele) => _.pick(ele, fields));
 };
+
+//
 
 //add vehicle
 vehicleCltr.addVehicle = async (req, res) => {
@@ -20,7 +22,7 @@ vehicleCltr.addVehicle = async (req, res) => {
     "vehicleNumber",
     "rcNumber",
     "permittedLoadCapacity",
-    "vehicalType",
+    "vehicleType",
     "permit",
   ]);
 
@@ -29,7 +31,7 @@ vehicleCltr.addVehicle = async (req, res) => {
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-
+    console.log(body)
     const { rc, vehicleImage } = req.files;
     const arrayBuffer = [...rc, ...vehicleImage];
     const allResolved = await Promise.all(
@@ -46,7 +48,6 @@ vehicleCltr.addVehicle = async (req, res) => {
       },
       { rcImages: [], vehicleImages: [] }
     );
-
     (body.rcImages = splitImage.rcImages),
       (body.vehicleImages = splitImage.vehicleImages);
     body.ownerId = req.user.id;
@@ -107,10 +108,39 @@ vehicleCltr.singleVehicle = async (req, res) => {
 //vehicle details update
 
 vehicleCltr.update = async (req, res) => {
+  const userId = req.user.id;
+  const vehicleId = req.params.vehicleId;
+  const errors = validationResult(req);
+  const body = _.pick(req.body, [
+    "vehicleNumber",
+    "rcNumber",
+    "permittedLoadCapacity",
+    "vehicalType",
+    "permit",
+  ]);
   try {
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    const vehicleDetail = await Vehicle.findOne({
+      _id: vehicleId,
+      ownerId: userId,
+    });
+    console.log();
+    if (vehicleDetail.isVerified === "approved") {
+      return res.status(403).json({
+        message:
+          "vehicle is already verified, You can't update the vehicle detials",
+      });
+    }
+    const { rc, vehicleImage } = req.files;
+    const arrayBuffer = [...rc, ...vehicleImage];
+
+    console.log(allResolved);
+
     res.json("hitted");
   } catch (e) {
-    res.status(500).json(e.message);
+    res.status(500).json({ error: e.message });
   }
 };
 
@@ -122,7 +152,8 @@ vehicleCltr.addVehicleType = async (req, res) => {
     "name",
     "code",
     "pricePerKiloMeter",
-    "range",
+    "minimumWeight",
+    "maximumWeight",
     "type",
   ]);
   try {

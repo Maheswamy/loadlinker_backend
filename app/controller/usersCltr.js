@@ -66,6 +66,7 @@ usersCltr.register = async (req, res) => {
 
 usersCltr.resendOtp = async (req, res) => {
   const body = _.pick(req.body, ["email"]);
+  console.log(body);
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -73,6 +74,7 @@ usersCltr.resendOtp = async (req, res) => {
     }
     const otp = generateOTP();
     // const hasedOTP = await saltAndHash(otp);
+    const updatedOtp = await User.findOne({ email: body.email });
     const mailOptions = {
       from: "mahendragowdas1997@gmail.com",
       to: updatedOtp.email,
@@ -82,7 +84,7 @@ usersCltr.resendOtp = async (req, res) => {
 
     transporter.sendMail(mailOptions, async (error, info) => {
       if (error) {
-        return res.status(500).json({ error: "Error sending email" });
+        return res.status(500).json({ error });
       } else {
         const updatedOtp = await User.findOneAndUpdate(
           { email: body.email },
@@ -101,7 +103,7 @@ usersCltr.resendOtp = async (req, res) => {
 };
 
 usersCltr.otpVerification = async (req, res) => {
-  const body = _.pick(req.body, ["otp","email"]);
+  const body = _.pick(req.body, ["otp", "email"]);
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

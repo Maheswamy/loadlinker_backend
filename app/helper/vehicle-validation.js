@@ -14,7 +14,68 @@ const findVehicleExists = async (value) => {
   }
 };
 
-const vehicleSchemaValidation = {
+const permit = {
+  notEmpty: notEmptyGenrator("vehicle Permit"),
+  isArray: {
+    options: {
+      min: 1,
+      max: 27,
+    },
+    errorMessage: "min one permitt is required",
+    bail: true,
+  },
+  custom: {
+    options: (value) => {
+      const result = value.every((ele) => isMongoId(ele));
+      if (result) {
+        return true;
+      } else {
+        throw new Error("array should only consist valid MongoID");
+      }
+    },
+  },
+};
+
+const permitLoadCapacity = {
+  notEmpty: notEmptyGenrator("maximum load capacity "),
+  isNumeric: {
+    errorMessage: "invalid format",
+  },
+};
+
+const vehicleType = {
+  notEmpty: notEmptyGenrator("vehicle type"),
+  isMongoId: {
+    errorMessage: "invalid maongo id",
+  },
+};
+
+const vehiclePhoto = {
+  custom: {
+    options: (value, { req }) => {
+      if (isEmpty(req.files)) {
+        throw new Error("no images found");
+      }
+      if (isEmpty(req.files.rc)) {
+        throw new Error("no rc images found");
+      }
+      if (req.files.rc.length > 2) {
+        throw new Error("only front and back image of RC is required");
+      }
+
+      if (isEmpty(req.files.vehicleImage)) {
+        throw new Error("vehicle images not found");
+      }
+      if (req.files.rc.length > 5) {
+        throw new Error("only five images of vehicle is enough");
+      } else {
+        return true;
+      }
+    },
+  },
+};
+
+const vehicleRegisterValidation = {
   vehicleNumber: {
     notEmpty: notEmptyGenrator("vehicle number "),
     custom: {
@@ -31,64 +92,23 @@ const vehicleSchemaValidation = {
       },
     },
   },
-  permit: {
-    notEmpty: notEmptyGenrator("vehicle Permit"),
-    isArray: {
-      options: {
-        min: 1,
-        max: 27,
-      },
-      errorMessage: "min one permitt is required",
-      bail: true,
-    },
-    custom: {
-      options: (value) => {
-        const result = value.every((ele) => isMongoId(ele));
-        if (result) {
-          return true;
-        } else {
-          throw new Error("array should only consist valid MongoID");
-        }
-      },
-    },
-  },
+  permit: permit,
+  permittedLoadCapacity: permitLoadCapacity,
+  vehicleType: vehicleType,
+  vehiclePhoto: vehiclePhoto,
+};
 
-  permittedLoadCapacity: {
-    notEmpty: notEmptyGenrator("maximum load capacity "),
-    isNumeric: {
-      errorMessage: "invalid format",
-    },
+const vehicleUpdateValidation = {
+  permit,
+  permitLoadCapacity,
+  vehiclePhoto,
+  vehicleType,
+  vehicleNumber: {
+    notEmpty: notEmptyGenrator("vehicle number "),
   },
-  vehicleType: {
-    notEmpty: notEmptyGenrator("vehicle type"),
-    isMongoId: {
-      errorMessage: "invalid maongo id",
-    },
-  },
-  vehiclePhoto: {
-    custom: {
-      options: (value, { req }) => {
-        if (isEmpty(req.files)) {
-          throw new Error("no images found");
-        }
-        if (isEmpty(req.files.rc)) {
-          throw new Error("no rc images found");
-        }
-        if (req.files.rc.length > 2) {
-          throw new Error("only front and back image of RC is required");
-        }
-
-        if (isEmpty(req.files.vehicleImage)) {
-          throw new Error("vehicle images not found");
-        }
-        if (req.files.rc.length > 5) {
-          throw new Error("only five images of vehicle is enough");
-        } else {
-          return true;
-        }
-      },
-    },
+  rcNumber: {
+    notEmpty: notEmptyGenrator("vehicle RC number "),
   },
 };
 
-module.exports = { vehicleSchemaValidation };
+module.exports = { vehicleRegisterValidation, vehicleUpdateValidation };

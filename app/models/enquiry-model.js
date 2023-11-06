@@ -3,19 +3,34 @@ const { Schema, model } = mongoose;
 
 const enquirySchema = new Schema(
   {
-    loadtype: String,
+    loadType: String,
     loadWeight: Number,
     dateOfPickUp: Date,
     pickUpLocation: {
-      address: String,
-      lat: String,
-      lng: String,
+      type: {
+        address: String,
+        area: String,
+        district: String,
+        state: String,
+        country: String,
+        pin: String,
+        lat: String,
+        lng: String,
+      },
     },
     dateOfUnload: Date,
-    unloadLocation: {
-      address: String,
-      lat: String,
-      lng: String,
+    dropUpLocation: {
+      type: {
+        address: String,
+        area: String,
+        district: String,
+        state: String,
+        country: String,
+        pin: String,
+      },
+    },
+    coordinates: {
+      type: { pickUpCoordinate: [], dropCoordinate: [] },
     },
     bids: {
       type: [
@@ -32,7 +47,7 @@ const enquirySchema = new Schema(
     },
     distance: Number,
     approximateTime: {
-      type: String,
+      type: Number,
     },
     shipperId: {
       type: Schema.Types.ObjectId,
@@ -41,6 +56,10 @@ const enquirySchema = new Schema(
     delete: {
       type: Boolean,
       default: false,
+    },
+    vehicleType: {
+      type: Schema.Types.ObjectId,
+      ref: "VehicleType",
     },
   },
 

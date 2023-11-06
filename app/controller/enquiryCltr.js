@@ -1,43 +1,63 @@
 const { validationResult } = require("express-validator");
 const Enquiry = require("../models/enquiry-model");
 const _ = require("lodash");
-const { default: axios } = require("axios");
 const {
-  addressToCoordinate,
+  addressPicker,
   calculateDistance,
 } = require("../helper/addressToCoordinate");
+const VehicleType = require("../models/vehicleType-model");
 
 const enquiryCltr = {};
 
-function millisecondsToReadableTime(milliseconds) {
-  const seconds = Math.floor((milliseconds / 1000) % 60);
-  const minutes = Math.floor((milliseconds / (1000 * 60)) % 60);
-  const hours = Math.floor((milliseconds / (1000 * 60 * 60)) % 24);
-  const days = Math.floor(milliseconds / (1000 * 60 * 60 * 24));
+// calculate the amount for enquiry
+enquiryCltr.calculate = async (req, res) => {
+  
+  const body = _.pick(req.body, [
+    "loadType",
+    "loadWeight",
+    "pickUpLocation",
+    "dropUpLocation",
+  ]);
+  const errors = validationResult(req);
+  try {
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
 
-  const parts = [];
-  if (days > 0) {
-    parts.push(days + (days === 1 ? " day" : " days"));
+    const pickUpCoordinate = await addressPicker(body.pickUpLocation);
+    const dropCoordinate = await addressPicker(body.dropUpLocation);
+    const distanceAndDuration = await calculateDistance([
+      pickUpCoordinate,
+      dropCoordinate,
+    ]);
+    const vehicle = await VehicleType.findOne({
+      $and: [
+        { minimumWeight: { $lte: body.loadWeight } },
+        { maximumWeight: { $gte: body.loadWeight } },
+      ],
+    });
+    const shippingAmount =
+      vehicle.pricePerKiloMeter * distanceAndDuration.distance;
+    
+    res.json({
+      pickUpCoordinate,
+      dropCoordinate,
+      distanceAndDuration,
+      shippingAmount,
+    });
+  } catch (e) {
+    res.status(500).json(e.message);
   }
-  if (hours > 0) {
-    parts.push(hours + (hours === 1 ? " hour" : " hours"));
-  }
-  if (minutes > 0) {
-    parts.push(minutes + (minutes === 1 ? " minute" : " minutes"));
-  }
-  if (seconds > 0) {
-    parts.push(seconds + (seconds === 1 ? " second" : " seconds"));
-  }
-  return parts.join(", ");
-}
+};
 
+// controller to create the Enquiry
 enquiryCltr.create = async (req, res) => {
   const body = _.pick(req.body, [
     "loadType",
     "loadWeight",
     "dateOfPickUp",
     "pickUpLocation",
-    "dropLocation",
+    "dropUpLocation",
     "dateOfUnload",
     "paymentType",
     "unloadLocation",
@@ -45,35 +65,77 @@ enquiryCltr.create = async (req, res) => {
 
   const errors = validationResult(req);
   try {
-    // if (!errors.isEmpty()) {
-    //   return res.json({ errors: errors.array() });
-    // }
+    if (!errors.isEmpty()) {
+      return res.json({ errors: errors.array() });
+    }
 
-    const responePickUpLocation = await addressToCoordinate(
-      body.pickUpLocation.address
-    );
-    const responeunloadLocation = await addressToCoordinate(
-      body.unloadLocation.address
-    );
+    const pickUpCoordinate = await addressPicker(body.pickUpLocation);
+    const dropCoordinate = await addressPicker(body.dropUpLocation);
+    console.log(pickUpCoordinate, dropCoordinate);
+    body.coordinates = { pickUpCoordinate, dropCoordinate };
 
-    console.log(responePickUpLocation, responePickUpLocation);
-    body.pickUpLocation.lat = responePickUpLocation.hits[0].point.lat;
-    body.pickUpLocation.lng = responePickUpLocation.hits[0].point.lng;
-    body.unloadLocation.lat = responeunloadLocation.hits[0].point.lat;
-    body.unloadLocation.lng = responeunloadLocation.hits[0].point.lng;
-    const distance = await calculateDistance([
-      [body.pickUpLocation.lng, body.pickUpLocation.lat],
-      [body.unloadLocation.lng, body.unloadLocation.lat],
+    const distanceAndDuration = await calculateDistance([
+      pickUpCoordinate,
+      dropCoordinate,
     ]);
-    body.distance = distance.paths[0].distance / 1000;
-    const approximateTime = distance.paths[0].time;
-    body.approximateTime = millisecondsToReadableTime(approximateTime);
+    console.log(distanceAndDuration, "amsajhdgasgdjh");
+    const vehicle = await VehicleType.findOne({
+      $and: [
+        { minimumWeight: { $lte: body.loadWeight } },
+        { maximumWeight: { $gte: body.loadWeight } },
+      ],
+    });
+    body.vehicleType = vehicle._id;
+    const shippingAmount =
+      vehicle.pricePerKiloMeter * distanceAndDuration.distance;
     body.shipperId = req.user.id;
+    body.amount = shippingAmount;
+    (body.distance = distanceAndDuration.distance),
+      (body.duration = distanceAndDuration.time);
     const newLoad = await new Enquiry(body).save();
 
     res.json({ newLoad });
   } catch (e) {
-    res.status(500).json(e);
+    res.status(500).json(e.message);
+  }
+};
+
+enquiryCltr.remove = async (req, res) => {
+  const enquiryId = req.params.enquiryId;
+  const errors = validationResult(req);
+  try {
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    const removedEnquiry = await Enquiry.findOneAndDelete(
+      req.user.role === "shipper"
+        ? {
+            _id: enquiryId,
+            shipperId: req.user.id,
+          }
+        : { _id: enquiryId }
+    );
+    if (!removedEnquiry) {
+      return res.status(404).json({ error: "no enquiry found" });
+    }
+    res.json({
+      message: "successfully enquiry deleted",
+      _id: removedEnquiry._id,
+    });
+  } catch (e) {
+    res.status(500).json(e.message);
+  }
+};
+
+enquiryCltr.myEnquiries = async (req, res) => {
+  try {
+    const enquires = await Enquiry.find({ shipperId: req.user.id });
+    if (!enquires) {
+      return res.json({ error: "not enquiries found" });
+    }
+    res.json(enquires);
+  } catch (e) {
+    res.status(500).json(e.message);
   }
 };
 
@@ -87,13 +149,15 @@ enquiryCltr.allEnquiry = async (req, res) => {
 };
 enquiryCltr.singleEnquiry = async (req, res) => {
   const id = req.params.enquiryId;
+  const errors = validationResult(req);
   try {
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
     const allEnquiry = await Enquiry.findById(id);
     res.json(allEnquiry);
   } catch (e) {
-    res.status(500).json(e);
+    res.status(500).json(e.message);
   }
 };
 module.exports = enquiryCltr;
-
-

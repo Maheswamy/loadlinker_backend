@@ -16,9 +16,16 @@ const {
   authorizeUser,
 } = require("./app/middleware/userAuthorization");
 const vehicleCltr = require("./app/controller/vehicleCltr");
-const { vehicleSchemaValidation } = require("./app/helper/vehicle-validation");
+const {
+  vehicleRegisterValidation,
+  vehicleUpdateValidation,
+} = require("./app/helper/vehicle-validation");
 const enquiryCltr = require("./app/controller/enquiryCltr");
-const addLoadValidation = require("./app/helper/shippment-validation");
+const {
+  enquiryIdValidation,
+  enquiryValidation,
+  enquiryCalculationValidation,
+} = require("./app/helper/Enquiry-validation");
 const {
   bidingSchemaValidation,
   bidUpdateValidation,
@@ -28,6 +35,7 @@ const biddingCltr = require("./app/controller/bidingCltr");
 const permitValidation = require("./app/helper/permitValidation");
 const shipmentCltr = require("./app/controller/shipmentCltr");
 const shipmentValidation = require("./app/helper/shipmentValidation");
+const { verifyUser } = require("./app/middleware/verifiyUser");
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -67,7 +75,7 @@ app.post(
   upload.fields([{ name: "vehicleImage" }, { name: "rc" }]),
   authenticateUser,
   authorizeUser(["owner", "admin"]),
-  checkSchema(vehicleSchemaValidation),
+  checkSchema(vehicleRegisterValidation),
   vehicleCltr.addVehicle
 );
 
@@ -91,11 +99,14 @@ app.get(
 
 app.put(
   "/api/vehicles/:vehicleId",
+  upload.fields([{ name: "vehicleImage" }, { name: "rc" }]),
   authenticateUser,
-  authorizeUser(["admin", "owner"]),
+  authorizeUser(["owner"]),
+  checkSchema(vehicleUpdateValidation),
   vehicleCltr.update
 );
 
+// add vehicle type
 app.post(
   "/api/vehicleTypes",
   authenticateUser,
@@ -105,19 +116,55 @@ app.post(
 
 app.get("/api/vehicleTypes", authenticateUser, vehicleCltr.vehicleTypeList);
 
-// shipper's end points
-
+//calculate the enquiry
 app.post(
-  "/api/addloads",
+  "/api/enquiries/calculate",
   authenticateUser,
-  authorizeUser(["shipper"]),
-  checkSchema(addLoadValidation),
+  authorizeUser(["admin", "shipper"]),
+  checkSchema(enquiryCalculationValidation),
+  verifyUser,
+  enquiryCltr.calculate
+);
+
+// post enquiry
+app.post(
+  "/api/enquiries/create",
+  authenticateUser,
+  authorizeUser(["admin", "shipper"]),
+  checkSchema(enquiryValidation),
   enquiryCltr.create
 );
-app.get("/api/marketplace", authenticateUser, enquiryCltr.allEnquiry);
+
+// api for get all enquiries of shipper
+app.get(
+  "/api/enquiries",
+  authenticateUser,
+  authorizeUser(["admin", "shipper"]),
+  enquiryCltr.myEnquiries
+);
+
+app.delete(
+  "/api/enquiries/:enquiryId",
+  authenticateUser,
+  authorizeUser(["admin", "shipper"]),
+  checkSchema(enquiryIdValidation),
+  enquiryCltr.remove
+);
+
+//api for all enquiries for owners
+app.get(
+  "/api/marketplace",
+  authenticateUser,
+  authorizeUser(["admin", "owner"]),
+  enquiryCltr.allEnquiry
+);
+
+// api for details of single enquiry
 app.get(
   "/api/marketplace/:enquiryId",
   authenticateUser,
+  authorizeUser(["admin", "owner"]),
+  checkSchema(enquiryIdValidation),
   enquiryCltr.singleEnquiry
 );
 
@@ -127,6 +174,7 @@ app.post(
   "/api/bids",
   authenticateUser,
   authorizeUser(["owner"]),
+  verifyUser,
   checkSchema(bidingSchemaValidation),
   biddingCltr.create
 );

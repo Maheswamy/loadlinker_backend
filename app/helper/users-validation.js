@@ -1,7 +1,4 @@
 const User = require("../models/user-model");
-// const {isEmail,isMobilePhone} = require('validator');
-
-//not empty function
 
 const notEmptyGenrator = (value) => {
   return {
@@ -60,7 +57,7 @@ const otpEmail = {
           throw new Error("email not found");
         }
       } catch (e) {
-        throw new Error(e);
+        throw new Error(e.message);
       }
     },
   },
@@ -69,10 +66,14 @@ const otpEmail = {
 const mobileNumber = {
   notEmpty: notEmptyGenrator("mobile number"),
   isAlphanumeric: {
-    errorMessage: "please enter only digits",
+    errorMessage: "please enter the number not string",
     bail: true,
   },
-  isMobilePhone: {
+  isLength: {
+    options: {
+      min: 10,
+      max: 10,
+    },
     errorMessage: "invalid mobile number",
     bail: true,
   },
@@ -86,7 +87,7 @@ const mobileNumber = {
           throw new Error("mobile number already exists");
         }
       } catch (e) {
-        throw new Error(e);
+        throw new Error(e.message);
       }
     },
   },
@@ -157,5 +158,5 @@ module.exports = {
   otpResendValidation,
   loginSchemaValidation,
   otpVerificationSchema,
-  notEmptyGenrator
+  notEmptyGenrator,
 };
