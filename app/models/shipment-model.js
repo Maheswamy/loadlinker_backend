@@ -15,6 +15,10 @@ const shipmentSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Bid",
     },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
     status: [
       {
         time: Date,

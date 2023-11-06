@@ -215,6 +215,23 @@ app.post(
   shipmentCltr.approve
 );
 
+// shipment list api
+
+app.get(
+  "/api/shipments",
+  authenticateUser,
+  authorizeUser(["admin", "shipper"]),
+  shipmentCltr.list
+);
+
+// single shipment api
+app.get(
+  "/api/shipments/:shipmentId",
+  authenticateUser,
+  authorizeUser(["admin", "shipper"]),
+  shipmentCltr.singleShipment
+);
+
 app.listen(port, () => {
   console.log("server running at port", port);
 });

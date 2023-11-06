@@ -11,7 +11,6 @@ const enquiryCltr = {};
 
 // calculate the amount for enquiry
 enquiryCltr.calculate = async (req, res) => {
-  
   const body = _.pick(req.body, [
     "loadType",
     "loadWeight",
@@ -38,7 +37,7 @@ enquiryCltr.calculate = async (req, res) => {
     });
     const shippingAmount =
       vehicle.pricePerKiloMeter * distanceAndDuration.distance;
-    
+
     res.json({
       pickUpCoordinate,
       dropCoordinate,
@@ -128,8 +127,11 @@ enquiryCltr.remove = async (req, res) => {
 };
 
 enquiryCltr.myEnquiries = async (req, res) => {
+  const role = req.user.role;
   try {
-    const enquires = await Enquiry.find({ shipperId: req.user.id });
+    const enquires = await Enquiry.find(
+      role == "admin" ? null : { shipperId: req.user.id }
+    );
     if (!enquires) {
       return res.json({ error: "not enquiries found" });
     }
@@ -141,7 +143,9 @@ enquiryCltr.myEnquiries = async (req, res) => {
 
 enquiryCltr.allEnquiry = async (req, res) => {
   try {
-    const allEnquiry = await Enquiry.find();
+    const allEnquiry = await Enquiry.find({
+      dateOfPickUp: { $gte: new Date() },
+    });
     res.json(allEnquiry);
   } catch (e) {
     res.status(500).json(e);

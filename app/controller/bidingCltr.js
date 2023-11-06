@@ -14,7 +14,7 @@ biddingCltr.create = async (req, res) => {
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    
+
     body.userId = req.user.id;
     const vehicleApprove = await Vehicle.findById(body.vehicleId);
     if (!vehicleApprove.isVerified) {
@@ -81,6 +81,36 @@ biddingCltr.remove = async (req, res) => {
     res.json(removedBid);
   } catch (e) {
     res.status(500).json(e);
+  }
+};
+
+biddingCltr.list = async (req, res) => {
+  const { role, id } = req.user;
+  try {
+    const bidsList = await Bid.find(role === "admin" ? null : { userId: id });
+
+    if (bidsList.length == 0) {
+      return res.status(400).json({ error: "no bids found" });
+    }
+    res.json(bidsList);
+  } catch (e) {
+    res.status(500).json(e.message);
+  }
+};
+
+biddingCltr.singleBid = async (req, res) => {
+  const { role, id } = req.user;
+  try {
+    const bidsList = await Bid.findOne(
+      role === "admin" ? null : { userId: id }
+    ).populate(["userId", "vehicleId", "enquiryId"]);
+
+    if (bidsList.length == 0) {
+      return res.status(400).json({ error: "no bids found" });
+    }
+    res.json(bidsList);
+  } catch (e) {
+    res.status(500).json(e.message);
   }
 };
 
