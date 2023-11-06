@@ -35,7 +35,7 @@ shipmentCltr.list = async (req, res) => {
     const { id, role } = req.user;
     const shipments = await Shipment.find(
       role == "admin" ? null : { userId: id }
-    );
+    ).populate(["enquiryId", "bidId", "userId", "payment"]);
     if (shipments.length == 0) {
       return res.status(404).json({ error: "no shipment found" });
     }
@@ -52,7 +52,7 @@ shipmentCltr.singleShipment = async (req, res) => {
     const shipment = await Shipment.findOne({
       _id: shipmentId,
       userId: role === "admin" ? null : id,
-    });
+    }).populate(["enquiryId", "bidId", "userId", "payment"]);
     if (!shipment) {
       return res.status(400).json({ error: "no shipment found" });
     }

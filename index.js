@@ -179,6 +179,22 @@ app.post(
   biddingCltr.create
 );
 
+// api for all bids
+app.get(
+  "/api/bids",
+  authenticateUser,
+  authorizeUser(["owner", "admin"]),
+  biddingCltr.list
+);
+
+//api for single
+app.get(
+  "/api/bids",
+  authenticateUser,
+  authorizeUser(["owner", "admin"]),
+  biddingCltr.singleBid
+);
+
 // modifying the bid placed by owner of vehicle
 
 app.put(
