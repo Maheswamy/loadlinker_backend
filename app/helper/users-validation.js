@@ -35,7 +35,7 @@ const email = {
           throw new Error("email already exists");
         }
       } catch (e) {
-        throw new Error(e);
+        throw new Error(e.message);
       }
     },
   },
@@ -143,8 +143,8 @@ const otpVerificationSchema = {
     notEmpty: notEmptyGenrator("OTP"),
     isLength: {
       options: {
-        min: 6,
-        max: 6,
+        min: 4,
+        max: 4,
       },
       errorMessage: "OTP should be 6 digit",
       bail: true,

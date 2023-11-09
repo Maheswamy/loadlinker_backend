@@ -14,7 +14,7 @@ const saltAndHash = async (value) => {
 };
 
 const generateOTP = () => {
-  const otp = `${Math.floor(100000 + Math.random() * 900000)}`;
+  const otp = `${Math.floor(1000 + Math.random() * 9000)}`;
   return otp;
 };
 
@@ -130,14 +130,14 @@ usersCltr.login = async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ error: errors.array() });
     }
     const user = await User.findOne({
       $or: [{ email: body.username }, { mobileNumber: body.username }],
     });
 
     if (!user) {
-      return res.status(400).json({ errors: "invalid username or password" });
+      return res.status(400).json({ error: "invalid username or password" });
     }
     if (!user.isVerified) {
       return res
@@ -161,18 +161,17 @@ usersCltr.login = async (req, res) => {
 
 usersCltr.profile = async (req, res) => {
   const { id } = req.user;
-  console.log(id, "cly");
   try {
     const user = await User.findById(id);
     console.log(user);
-    const responseDate = _.pick(user, [
+    const userData = _.pick(user, [
       "firstName",
       "lastName",
       "email",
       "mobileNumber",
       "reviews",
     ]);
-    res.json({ profileData: responseDate });
+    res.json({ userData });
   } catch (e) {
     res.status(500).json(e);
   }

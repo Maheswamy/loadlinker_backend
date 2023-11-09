@@ -40,7 +40,7 @@ const enquirySchema = new Schema(
         },
       ],
     },
-    amount: Number,
+    amount: String,
     paymentType: {
       type: String,
       enum: ["advance", "after shipment"],

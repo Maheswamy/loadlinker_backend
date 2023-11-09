@@ -154,8 +154,8 @@ app.delete(
 //api for all enquiries for owners
 app.get(
   "/api/marketplace",
-  authenticateUser,
-  authorizeUser(["admin", "owner"]),
+  // authenticateUser,
+  // authorizeUser(["admin", "owner"]),
   enquiryCltr.allEnquiry
 );
 

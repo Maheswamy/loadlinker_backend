@@ -35,8 +35,10 @@ enquiryCltr.calculate = async (req, res) => {
         { maximumWeight: { $gte: body.loadWeight } },
       ],
     });
-    const shippingAmount =
-      vehicle.pricePerKiloMeter * distanceAndDuration.distance;
+    const shippingAmount = new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR", // Currency code for Indian Rupees
+    }).format(vehicle.pricePerKiloMeter * distanceAndDuration.distance);
 
     res.json({
       pickUpCoordinate,
@@ -88,7 +90,7 @@ enquiryCltr.create = async (req, res) => {
     const shippingAmount =
       vehicle.pricePerKiloMeter * distanceAndDuration.distance;
     body.shipperId = req.user.id;
-    body.amount = shippingAmount;
+    body.amount = Math.round(shippingAmount);
     (body.distance = distanceAndDuration.distance),
       (body.duration = distanceAndDuration.time);
     const newLoad = await new Enquiry(body).save();
@@ -146,7 +148,20 @@ enquiryCltr.allEnquiry = async (req, res) => {
     const allEnquiry = await Enquiry.find({
       dateOfPickUp: { $gte: new Date() },
     });
-    res.json(allEnquiry);
+    if (allEnquiry.length === 0) {
+      return res.status(404).json({ errors: "no enquiry in market" });
+    }
+    const sanitizeEnquiry = allEnquiry.map((ele) =>
+      _.pick(ele, [
+        "loadType",
+        "loadWeight",
+        "pickUpLocation.district",
+        "dropUpLocation.district",
+        "amount",
+        "paymentType",
+      ])
+    );
+    res.json(sanitizeEnquiry);
   } catch (e) {
     res.status(500).json(e);
   }
