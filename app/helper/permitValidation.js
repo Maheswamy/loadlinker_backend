@@ -38,6 +38,7 @@ const permitValidation = {
           "Uttar Pradesh",
           "Uttarakhand",
           "West Bengal",
+          "Jammu and Kashmir",
         ],
       ],
       errorMessage: "only select the available permit ",

@@ -214,11 +214,18 @@ app.delete(
 );
 
 app.post(
-  "/api/vehicles/permit",
+  "/api/permits",
   authenticateUser,
   authorizeUser(["admin"]),
   checkSchema(permitValidation),
   vehicleCltr.addPermit
+);
+
+app.get(
+  "/api/permits",
+  authenticateUser,
+  authorizeUser(["admin", "owner"]),
+  vehicleCltr.permitList
 );
 
 // shipment approve api

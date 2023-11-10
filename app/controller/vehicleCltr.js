@@ -31,7 +31,7 @@ vehicleCltr.addVehicle = async (req, res) => {
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    console.log(body)
+    console.log(body);
     const { rc, vehicleImage } = req.files;
     const arrayBuffer = [...rc, ...vehicleImage];
     const allResolved = await Promise.all(
@@ -187,6 +187,17 @@ vehicleCltr.addPermit = async (req, res) => {
     const newPermit = await new Permit(body).save();
     res.json({ message: `permit of ${newPermit.state} is created ` });
   } catch (e) {
+    res.status(500).json(e.message);
+  }
+};
+
+vehicleCltr.permitList = async (req, res) => {
+  try {
+    const permitList = await Permit.find();
+
+    res.json(permitList);
+  } catch (e) {
+    
     res.status(500).json(e.message);
   }
 };
