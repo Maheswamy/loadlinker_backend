@@ -153,6 +153,7 @@ enquiryCltr.allEnquiry = async (req, res) => {
     }
     const sanitizeEnquiry = allEnquiry.map((ele) =>
       _.pick(ele, [
+        "_id",
         "loadType",
         "loadWeight",
         "pickUpLocation.district",
