@@ -15,6 +15,11 @@ const bidSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "Enquiry",
   },
+  status: {
+    type: String,
+    default: "active",
+    enum: ["active", "rejected", "approved"],
+  },
 });
 
 const Bid = model("Bid", bidSchema);

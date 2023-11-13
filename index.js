@@ -121,7 +121,7 @@ app.post(
   "/api/enquiries/calculate",
   authenticateUser,
   authorizeUser(["admin", "shipper"]),
-  checkSchema(enquiryCalculationValidation),
+  // checkSchema(enquiryCalculationValidation),
   verifyUser,
   enquiryCltr.calculate
 );
@@ -131,7 +131,7 @@ app.post(
   "/api/enquiries/create",
   authenticateUser,
   authorizeUser(["admin", "shipper"]),
-  checkSchema(enquiryValidation),
+  // checkSchema(enquiryValidation),
   enquiryCltr.create
 );
 
@@ -163,7 +163,6 @@ app.get(
 app.get(
   "/api/marketplace/:enquiryId",
   authenticateUser,
-  authorizeUser(["admin", "owner"]),
   checkSchema(enquiryIdValidation),
   enquiryCltr.singleEnquiry
 );

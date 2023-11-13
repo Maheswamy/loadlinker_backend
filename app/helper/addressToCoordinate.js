@@ -1,20 +1,24 @@
 const axios = require("axios");
 
 const addressPicker = async (fulladdress) => {
-  const { address, area, district, state, country, pin } = fulladdress;
+  const { address, area, district, state, country, pin, lat, lng } =
+    fulladdress;
   return await addressToCoordinate(
-    `${area},${district},${state},${country},${pin}`
+    `${area},${district},${state},${country},${pin}`,
+    lat,
+    lng
   );
 };
 
-const addressToCoordinate = async (address) => {
+const addressToCoordinate = async (address, lat = "", lng = "") => {
+  console.log(address, lat, lng);
   const query = new URLSearchParams({
-    q: `${address}`,
+    q: lat && lng ? "" : `${address}`,
     locale: "en",
     limit: "1",
-    reverse: "false",
+    reverse: lat && lng ? "true" : "false",
     debug: "false",
-    point: "",
+    point: lat && lng ? `${lat},${lng}` : "",
     provider: "default",
     key: process.env.GRAPHHOPPER_API_KEY,
   }).toString();
@@ -41,7 +45,7 @@ const calculateDistance = async (coordinates) => {
         points: coordinates,
         snap_preventions: ["motorway", "ferry", "tunnel"],
         details: ["road_class", "surface"],
-        vehicle: "truck",
+        vehicle: "bike",
         locale: "en",
         instructions: true,
         calc_points: true,
@@ -55,8 +59,12 @@ const calculateDistance = async (coordinates) => {
     );
 
     const data = resp.data;
-    return { distance: data.paths[0].distance/1000, time: data.paths[0].time/1000 };
+    return {
+      distance: data.paths[0].distance / 1000,
+      time: data.paths[0].time / 1000,
+    };
   } catch (error) {
+    console.log(error);
     return error.message;
   }
 };

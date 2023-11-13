@@ -44,7 +44,7 @@ enquiryCltr.calculate = async (req, res) => {
       pickUpCoordinate,
       dropCoordinate,
       distanceAndDuration,
-      shippingAmount,
+      shippingAmount:shippingAmount.slice(0,-3),
     });
   } catch (e) {
     res.status(500).json(e.message);
@@ -174,7 +174,10 @@ enquiryCltr.singleEnquiry = async (req, res) => {
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    const allEnquiry = await Enquiry.findById(id);
+    const allEnquiry = await Enquiry.findById(id).populate({
+      path: "bids",
+      populate: { path: "userId" },
+    });
     res.json(allEnquiry);
   } catch (e) {
     res.status(500).json(e.message);

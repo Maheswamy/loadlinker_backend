@@ -28,7 +28,7 @@ biddingCltr.create = async (req, res) => {
       },
       { new: true }
     );
-    res.json({ message: "new bid added", newBid });
+    res.json(newBid);
   } catch (e) {
     res.status(500).json(e);
   }
