@@ -161,8 +161,9 @@ app.get(
 
 // api for details of single enquiry
 app.get(
-  "/api/marketplace/:enquiryId",
+  "/api/enquiries/:enquiryId",
   authenticateUser,
+  authorizeUser(["admin", "shipper",'owner']),
   checkSchema(enquiryIdValidation),
   enquiryCltr.singleEnquiry
 );

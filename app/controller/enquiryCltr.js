@@ -44,7 +44,7 @@ enquiryCltr.calculate = async (req, res) => {
       pickUpCoordinate,
       dropCoordinate,
       distanceAndDuration,
-      shippingAmount:shippingAmount.slice(0,-3),
+      shippingAmount: shippingAmount.slice(0, -3),
     });
   } catch (e) {
     res.status(500).json(e.message);
@@ -132,10 +132,10 @@ enquiryCltr.myEnquiries = async (req, res) => {
   const role = req.user.role;
   try {
     const enquires = await Enquiry.find(
-      role == "admin" ? null : { shipperId: req.user.id }
-    );
+      role === "admin" ? null : { shipperId: req.user.id }
+    ).populate({ path: "bids", populate: { path: "vehicleId userId" ,select:'vehicleNumber permittedLoadCapacity bidAmount firstName lastName',} });
     if (!enquires) {
-      return res.json({ error: "not enquiries found" });
+      return res.json({ error: "no enquiries found" });
     }
     res.json(enquires);
   } catch (e) {

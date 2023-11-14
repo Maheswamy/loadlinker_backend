@@ -162,7 +162,7 @@ usersCltr.login = async (req, res) => {
 usersCltr.profile = async (req, res) => {
   const { id } = req.user;
   try {
-    const user = await User.findById(id).populate('vehicles');
+    const user = await User.findById(id);
     console.log(user);
     const userData = _.pick(user, [
       "firstName",
@@ -170,7 +170,8 @@ usersCltr.profile = async (req, res) => {
       "email",
       "mobileNumber",
       "reviews",
-      "vehicles"
+      "vehicles",
+      "isVerified",
     ]);
     res.json({ userData });
   } catch (e) {

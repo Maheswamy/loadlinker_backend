@@ -28,7 +28,11 @@ biddingCltr.create = async (req, res) => {
       },
       { new: true }
     );
-    res.json(newBid);
+    const responseObj = await Bid.findById(newBid._id).populate({
+      path: "vehicleId enquiryId",
+      select: "vehicleNumber loadType loadWeight amount",
+    });
+    res.json(responseObj);
   } catch (e) {
     res.status(500).json(e);
   }
@@ -87,7 +91,12 @@ biddingCltr.remove = async (req, res) => {
 biddingCltr.list = async (req, res) => {
   const { role, id } = req.user;
   try {
-    const bidsList = await Bid.find(role === "admin" ? null : { userId: id });
+    const bidsList = await Bid.find(
+      role === "admin" ? null : { userId: id }
+    ).populate({
+      path: "vehicleId enquiryId",
+      select: "vehicleNumber loadType loadWeight amount",
+    });
 
     if (bidsList.length == 0) {
       return res.status(400).json({ error: "no bids found" });

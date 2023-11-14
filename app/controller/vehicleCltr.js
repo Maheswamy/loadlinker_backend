@@ -72,13 +72,7 @@ vehicleCltr.list = async (req, res) => {
     if (list.length == 0) {
       return res.status(404).json({ error: "no vehicles found" });
     }
-    const response = requiredPick(list, [
-      "_id",
-      "rcNumber",
-      "vehicleNumber",
-      "isVerified",
-    ]);
-    res.json(response);
+    res.json(list);
   } catch (e) {
     res.status(500).json(e.message);
   }
@@ -197,7 +191,6 @@ vehicleCltr.permitList = async (req, res) => {
 
     res.json(permitList);
   } catch (e) {
-    
     res.status(500).json(e.message);
   }
 };
