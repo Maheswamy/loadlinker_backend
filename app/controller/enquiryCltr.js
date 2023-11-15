@@ -132,10 +132,10 @@ enquiryCltr.myEnquiries = async (req, res) => {
   const role = req.user.role;
   try {
     const enquires = await Enquiry.find(
-      role === "admin" ? null : { shipperId: req.user.id }
-    ).populate({ path: "bids", populate: { path: "vehicleId userId" ,select:'vehicleNumber permittedLoadCapacity bidAmount firstName lastName',} });
+      role === "admin" ? null : { shipperId: req.user.id ,delete:false }
+    );
     if (!enquires) {
-      return res.json({ error: "no enquiries found" });
+      return res.status(404).json({ error: "no enquiries found" });
     }
     res.json(enquires);
   } catch (e) {

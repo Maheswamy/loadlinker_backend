@@ -3,6 +3,7 @@ const Enquiry = require("../models/enquiry-model");
 const _ = require("lodash");
 const Bid = require("../models/bid-model");
 const Vehicle = require("../models/vehicle-model");
+const { enquiryId } = require("../helper/shipmentValidation");
 const biddingCltr = {};
 
 // owner bidding his best price to enquiry post of load
@@ -28,6 +29,7 @@ biddingCltr.create = async (req, res) => {
       },
       { new: true }
     );
+    
     const responseObj = await Bid.findById(newBid._id).populate({
       path: "vehicleId enquiryId",
       select: "vehicleNumber loadType loadWeight amount",
@@ -89,19 +91,42 @@ biddingCltr.remove = async (req, res) => {
 };
 
 biddingCltr.list = async (req, res) => {
+  const enquiryId=req.params.enquiryId
   const { role, id } = req.user;
   try {
-    const bidsList = await Bid.find(
-      role === "admin" ? null : { userId: id }
-    ).populate({
-      path: "vehicleId enquiryId",
-      select: "vehicleNumber loadType loadWeight amount",
-    });
+    if (role === "role") {
+      const bidsList = await Bid.find(role === "admin").populate({
+        path: "vehicleId enquiryId",
+        select: "vehicleNumber loadType loadWeight amount",
+      });
 
-    if (bidsList.length == 0) {
-      return res.status(400).json({ error: "no bids found" });
+      if (bidsList.length == 0) {
+        return res.status(400).json({ error: "no bids found" });
+      }
+      return res.json(bidsList);
     }
-    res.json(bidsList);
+    if (role === "owner") {
+      const bidsList = await Bid.find({ userId: id }).populate({
+        path: "vehicleId enquiryId",
+        select: "vehicleNumber loadType loadWeight amount",
+      });
+
+      if (bidsList.length == 0) {
+        return res.status(400).json({ error: "no bids found" });
+      }
+      return res.json(bidsList);
+    }
+    if (role === "shipper") {
+      const bidsList = await Bid.find({ enquiryId: enquiryId }).populate({
+        path: "vehicleId enquiryId userId",
+        select: "vehicleNumber loadType loadWeight amount firstName lastName mobileNumber",
+      });
+
+      if (bidsList.length == 0) {
+        return res.status(400).json({ error: "no bids found" });
+      }
+      return res.json(bidsList);
+    }
   } catch (e) {
     res.status(500).json(e.message);
   }

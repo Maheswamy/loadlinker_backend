@@ -186,10 +186,16 @@ app.get(
   authorizeUser(["owner", "admin"]),
   biddingCltr.list
 );
+app.get(
+  "/api/bids/:enquiryId",
+  authenticateUser,
+  authorizeUser(["shipper", "admin"]),
+  biddingCltr.list
+);
 
 //api for single
 app.get(
-  "/api/bids",
+  "/api/bids/:bidId",
   authenticateUser,
   authorizeUser(["owner", "admin"]),
   biddingCltr.singleBid
