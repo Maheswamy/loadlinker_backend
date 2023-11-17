@@ -19,16 +19,11 @@ const shipmentSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "User",
     },
-    status: [
-      {
-        time: Date,
-        text: {
-          type: String,
-          enum: ["waiting", "canceled", "loaded", "unloaded"],
-          default: "waiting",
-        },
-      },
-    ],
+    status: {
+      type: String,
+      enum: ["waiting", "canceled", "loaded", "unloaded"],
+      default: "waiting",
+    },
   },
   { timestamps: true }
 );

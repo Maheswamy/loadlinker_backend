@@ -3,23 +3,32 @@ const Enquiry = require("../models/enquiry-model");
 const Vehicle = require("../models/vehicle-model");
 const Shipment = require("../models/shipment-model");
 const { validationResult } = require("express-validator");
+const Bid = require("../models/bid-model");
 
 const shipmentCltr = {};
 
 shipmentCltr.approve = async (req, res) => {
   const enquiryId = req.params.enquiryId;
   const body = _.pick(req.body, ["bidId"]);
+
   const errors = validationResult(req);
   try {
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
     body.enquiryId = enquiryId;
+    body.userId = req.user.id;
     const addShipment = await new Shipment(body).save();
     const softDeleteEnquiry = await Enquiry.findByIdAndUpdate(
       addShipment.enquiryId,
       { delete: true }
     );
+    await Bid.updateMany(
+      { enquiryId: enquiryId },
+      { $set: { status: "rejected" } }
+    );
+    await Bid.findByIdAndUpdate(addShipment.bidId, { status: "approved" });
+
     const shipmentDetail = await Shipment.findById(addShipment._id).populate(
       "bidId enquiryId"
     );
@@ -33,15 +42,37 @@ shipmentCltr.approve = async (req, res) => {
 shipmentCltr.list = async (req, res) => {
   try {
     const { id, role } = req.user;
-    const shipments = await Shipment.find(
-      role == "admin" ? null : { userId: id }
-    ).populate(["enquiryId", "bidId", "userId", "payment"]);
-    if (shipments.length == 0) {
-      return res.status(404).json({ error: "no shipment found" });
+    if (role === "admin") {
+      const shipments = await Shipment.find().populate([
+        "enquiryId",
+        "bidId",
+        "userId",
+        "payment",
+      ]);
+
+      return res.json(shipments);
     }
-    res.json(shipments);
+    if (role === "shipper") {
+      const shipments = await Shipment.find({ userId: id })
+        .populate("enquiryId userId payment")
+        .populate({
+          path: "bidId",
+          populate: {
+            path: "vehicleId", // Specify the nested field using dot notation
+            select: "vehicleNumber",
+          },
+        });
+      return res.json(shipments);
+    }
+    // if (role === "owner") {
+    //   const shipments = await Shipment.find(
+    //     role == "admin" ? null : { userId: id }
+    //   ).populate(["enquiryId", "bidId", "userId", "payment"]);
+    //
+    //   return res.json(shipments);
+    // }
   } catch (e) {
-    res.json(e.message);
+    res.status(500).json(e.message);
   }
 };
 

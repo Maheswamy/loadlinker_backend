@@ -249,7 +249,7 @@ app.post(
 app.get(
   "/api/shipments",
   authenticateUser,
-  authorizeUser(["admin", "shipper"]),
+  authorizeUser(["admin", "shipper",'owner']),
   shipmentCltr.list
 );
 

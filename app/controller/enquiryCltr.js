@@ -146,7 +146,7 @@ enquiryCltr.myEnquiries = async (req, res) => {
 enquiryCltr.allEnquiry = async (req, res) => {
   try {
     const allEnquiry = await Enquiry.find({
-      dateOfPickUp: { $gte: new Date() },
+      dateOfPickUp: { $gte: new Date() },delete:false
     });
     if (allEnquiry.length === 0) {
       return res.status(404).json({ errors: "no enquiry in market" });
