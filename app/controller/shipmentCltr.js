@@ -64,13 +64,13 @@ shipmentCltr.list = async (req, res) => {
         });
       return res.json(shipments);
     }
-    // if (role === "owner") {
-    //   const shipments = await Shipment.find(
-    //     role == "admin" ? null : { userId: id }
-    //   ).populate(["enquiryId", "bidId", "userId", "payment"]);
-    //
-    //   return res.json(shipments);
-    // }
+    if (role === "owner") {
+      const shipments = await Shipment.find(
+       { userId: id }
+      ).populate(["enquiryId", "bidId", "userId", "payment"]);
+    
+      return res.json(shipments);
+    }
   } catch (e) {
     res.status(500).json(e.message);
   }

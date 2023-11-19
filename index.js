@@ -36,6 +36,7 @@ const permitValidation = require("./app/helper/permitValidation");
 const shipmentCltr = require("./app/controller/shipmentCltr");
 const shipmentValidation = require("./app/helper/shipmentValidation");
 const { verifyUser } = require("./app/middleware/verifiyUser");
+const paymentCltr = require("./app/controller/paymentCltr");
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -163,7 +164,7 @@ app.get(
 app.get(
   "/api/enquiries/:enquiryId",
   authenticateUser,
-  authorizeUser(["admin", "shipper",'owner']),
+  authorizeUser(["admin", "shipper", "owner"]),
   checkSchema(enquiryIdValidation),
   enquiryCltr.singleEnquiry
 );
@@ -249,7 +250,7 @@ app.post(
 app.get(
   "/api/shipments",
   authenticateUser,
-  authorizeUser(["admin", "shipper",'owner']),
+  authorizeUser(["admin", "shipper", "owner"]),
   shipmentCltr.list
 );
 
@@ -259,6 +260,22 @@ app.get(
   authenticateUser,
   authorizeUser(["admin", "shipper"]),
   shipmentCltr.singleShipment
+);
+
+// payment create
+
+app.post(
+  "/api/payment",
+  authenticateUser,
+  authorizeUser(["shipper"]),
+  paymentCltr.create
+);
+
+app.put(
+  "/api/payment",
+  authenticateUser,
+  authorizeUser(["shipper"]),
+  paymentCltr.update
 );
 
 app.listen(port, () => {
