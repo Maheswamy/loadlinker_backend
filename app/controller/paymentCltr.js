@@ -1,6 +1,7 @@
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const _ = require("lodash");
 const Payment = require("../models/payment-model");
+const Shipment = require("../models/shipment-model");
 const paymentCltr = {};
 
 paymentCltr.create = async (req, res) => {
@@ -42,7 +43,7 @@ paymentCltr.create = async (req, res) => {
 };
 
 paymentCltr.update = async (req, res) => {
-  const body = _.pick(req.body, ["transactionId"]);
+  const body = _.pick(req.body, ["shipmentId", "transactionId"]);
 
   try {
     const payment = await Payment.findOneAndUpdate(
@@ -52,7 +53,23 @@ paymentCltr.update = async (req, res) => {
         new: true,
       }
     );
-    res.json(payment);
+    
+    const updateShipment = await Shipment.findByIdAndUpdate(
+      body.shipmentId,
+      { payment: payment._id },
+      {
+        new: true,
+      }
+    )
+      .populate("enquiryId payment")
+      .populate({
+        path: "bidId",
+        populate: {
+          path: "vehicleId", // Specify the nested field using dot notation
+          select: "vehicleNumber",
+        },
+      });
+    res.json(updateShipment);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

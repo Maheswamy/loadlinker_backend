@@ -15,7 +15,11 @@ const shipmentSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Bid",
     },
-    userId: {
+    shipper: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+    owner: {
       type: Schema.Types.ObjectId,
       ref: "User",
     },

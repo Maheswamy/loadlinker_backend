@@ -69,9 +69,9 @@ vehicleCltr.list = async (req, res) => {
     const list = await Vehicle.find(
       role === "admin" ? null : { ownerId: userId }
     );
-    if (list.length == 0) {
-      return res.status(404).json({ error: "no vehicles found" });
-    }
+    // if (list.length == 0) {
+    //   return res.status(404).json({ error: "no vehicles found" });
+    // }
     res.json(list);
   } catch (e) {
     res.status(500).json(e.message);

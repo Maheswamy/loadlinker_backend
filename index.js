@@ -34,7 +34,10 @@ const {
 const biddingCltr = require("./app/controller/bidingCltr");
 const permitValidation = require("./app/helper/permitValidation");
 const shipmentCltr = require("./app/controller/shipmentCltr");
-const shipmentValidation = require("./app/helper/shipmentValidation");
+const {
+  shipmentValidation,
+  updateShipment,
+} = require("./app/helper/shipmentValidation");
 const { verifyUser } = require("./app/middleware/verifiyUser");
 const paymentCltr = require("./app/controller/paymentCltr");
 const app = express();
@@ -153,12 +156,7 @@ app.delete(
 );
 
 //api for all enquiries for owners
-app.get(
-  "/api/marketplace",
-  // authenticateUser,
-  // authorizeUser(["admin", "owner"]),
-  enquiryCltr.allEnquiry
-);
+app.get("/api/marketplace", enquiryCltr.allEnquiry);
 
 // api for details of single enquiry
 app.get(
@@ -196,7 +194,7 @@ app.get(
 
 //api for single
 app.get(
-  "/api/bids/:bidId",
+  "/api/mybids/:bidId",
   authenticateUser,
   authorizeUser(["owner", "admin"]),
   biddingCltr.singleBid
@@ -254,13 +252,21 @@ app.get(
   shipmentCltr.list
 );
 
-// single shipment api
-app.get(
+app.put(
   "/api/shipments/:shipmentId",
   authenticateUser,
-  authorizeUser(["admin", "shipper"]),
-  shipmentCltr.singleShipment
+  authorizeUser(["admin", "owner",'shipper']),
+  checkSchema(updateShipment),
+  shipmentCltr.update
 );
+
+// // single shipment api
+// app.get(
+//   "/api/shipments/:shipmentId",
+//   authenticateUser,
+//   authorizeUser(["admin", "shipper"]),
+//   shipmentCltr.singleShipment
+// );
 
 // payment create
 

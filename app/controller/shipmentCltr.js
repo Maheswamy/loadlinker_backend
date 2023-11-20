@@ -17,7 +17,10 @@ shipmentCltr.approve = async (req, res) => {
       return res.status(400).json({ errors: errors.array() });
     }
     body.enquiryId = enquiryId;
-    body.userId = req.user.id;
+    body.shipper = req.user.id;
+    const ownerId = await Bid.findById(body.bidId);
+    body.owner = ownerId.userId;
+    console.log(body);
     const addShipment = await new Shipment(body).save();
     const softDeleteEnquiry = await Enquiry.findByIdAndUpdate(
       addShipment.enquiryId,
@@ -53,8 +56,8 @@ shipmentCltr.list = async (req, res) => {
       return res.json(shipments);
     }
     if (role === "shipper") {
-      const shipments = await Shipment.find({ userId: id })
-        .populate("enquiryId userId payment")
+      const shipments = await Shipment.find({ shipper: id })
+        .populate("enquiryId payment")
         .populate({
           path: "bidId",
           populate: {
@@ -65,10 +68,20 @@ shipmentCltr.list = async (req, res) => {
       return res.json(shipments);
     }
     if (role === "owner") {
-      const shipments = await Shipment.find(
-       { userId: id }
-      ).populate(["enquiryId", "bidId", "userId", "payment"]);
-    
+      const shipments = await Shipment.find({ owner: id })
+        .populate(["enquiryId", "payment"])
+        .populate({
+          path: "bidId",
+          populate: {
+            path: "vehicleId", // Specify the nested field using dot notation
+            select: "vehicleNumber",
+          },
+        })
+        .populate({
+          path: "shipper",
+          select: "firstName lastName mobileNumber",
+        });
+
       return res.json(shipments);
     }
   } catch (e) {
@@ -76,21 +89,57 @@ shipmentCltr.list = async (req, res) => {
   }
 };
 
-shipmentCltr.singleShipment = async (req, res) => {
-  const { shipmentId } = -req.params;
-  const { id, role } = req.user;
+shipmentCltr.update = async (req, res) => {
+  const id = req.params.shipmentId;
+  const body = _.pick(req.body, ["status"]);
+  console.log(body, id);
+  const errors = validationResult(req);
   try {
-    const shipment = await Shipment.findOne({
-      _id: shipmentId,
-      userId: role === "admin" ? null : id,
-    }).populate(["enquiryId", "bidId", "userId", "payment"]);
-    if (!shipment) {
-      return res.status(400).json({ error: "no shipment found" });
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
-    res.json(shipment);
+    const updateShipment = await Shipment.findOneAndUpdate(
+      { _id: id, owner: req.user.id },
+      body,
+      {
+        new: true,
+      }
+    );
+    console.log(updateShipment);
+    const shipments = await Shipment.findOne({ _id: updateShipment._id })
+      .populate(["enquiryId", "payment"])
+      .populate({
+        path: "bidId",
+        populate: {
+          path: "vehicleId", // Specify the nested field using dot notation
+          select: "vehicleNumber",
+        },
+      })
+      .populate({
+        path: "shipper",
+        select: "firstName lastName mobileNumber",
+      });
+    res.json(shipments);
   } catch (e) {
     res.status(500).json(e.message);
   }
 };
+
+// shipmentCltr.singleShipment = async (req, res) => {
+//   const { shipmentId } = -req.params;
+//   const { id, role } = req.user;
+//   try {
+//     const shipment = await Shipment.findOne({
+//       _id: shipmentId,
+//       userId: role === "admin" ? null : id,
+//     }).populate(["enquiryId", "bidId", "userId", "payment"]);
+//     if (!shipment) {
+//       return res.status(400).json({ error: "no shipment found" });
+//     }
+//     res.json(shipment);
+//   } catch (e) {
+//     res.status(500).json(e.message);
+//   }
+// };
 
 module.exports = shipmentCltr;

@@ -29,7 +29,7 @@ biddingCltr.create = async (req, res) => {
       },
       { new: true }
     );
-    
+
     const responseObj = await Bid.findById(newBid._id).populate({
       path: "vehicleId enquiryId",
       select: "vehicleNumber loadType loadWeight amount",
@@ -91,7 +91,7 @@ biddingCltr.remove = async (req, res) => {
 };
 
 biddingCltr.list = async (req, res) => {
-  const enquiryId=req.params.enquiryId
+  const enquiryId = req.params.enquiryId;
   const { role, id } = req.user;
   try {
     if (role === "role") {
@@ -100,9 +100,9 @@ biddingCltr.list = async (req, res) => {
         select: "vehicleNumber loadType loadWeight amount",
       });
 
-      if (bidsList.length == 0) {
-        return res.status(400).json({ error: "no bids found" });
-      }
+      // if (bidsList.length == 0) {
+      //   return res.status(400).json({ error: "no bids found" });
+      // }
       return res.json(bidsList);
     }
     if (role === "owner") {
@@ -111,20 +111,21 @@ biddingCltr.list = async (req, res) => {
         select: "vehicleNumber loadType loadWeight amount",
       });
 
-      if (bidsList.length == 0) {
-        return res.status(400).json({ error: "no bids found" });
-      }
+      // if (bidsList.length == 0) {
+      //   return res.status(400).json({ error: "no bids found" });
+      // }
       return res.json(bidsList);
     }
     if (role === "shipper") {
       const bidsList = await Bid.find({ enquiryId: enquiryId }).populate({
         path: "vehicleId enquiryId userId",
-        select: "vehicleNumber loadType loadWeight amount firstName lastName mobileNumber",
+        select:
+          "vehicleNumber loadType loadWeight amount firstName lastName mobileNumber",
       });
 
-      if (bidsList.length == 0) {
-        return res.status(400).json({ error: "no bids found" });
-      }
+      // if (bidsList.length == 0) {
+      //   return res.status(400).json({ error: "no bids found" });
+      // }
       return res.json(bidsList);
     }
   } catch (e) {
@@ -133,15 +134,16 @@ biddingCltr.list = async (req, res) => {
 };
 
 biddingCltr.singleBid = async (req, res) => {
+  const { bidId } = req.params;
   const { role, id } = req.user;
   try {
     const bidsList = await Bid.findOne(
-      role === "admin" ? null : { userId: id }
-    ).populate(["userId", "vehicleId", "enquiryId"]);
+      role === "admin" ? {} : { _id: bidId,userId: id }
+    ).populate({
+      path: "enquiryId",
+      populate: { path: "shipperId", select: "lastName firstName" },
+    });
 
-    if (bidsList.length == 0) {
-      return res.status(400).json({ error: "no bids found" });
-    }
     res.json(bidsList);
   } catch (e) {
     res.status(500).json(e.message);

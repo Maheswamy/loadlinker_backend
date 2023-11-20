@@ -4,6 +4,7 @@ const authenticateUser = async (req, res, next) => {
   const tokenData = req.headers["authorization"];
   try {
     if (tokenData) {
+      console.log(tokenData)
       const token = tokenData.split(" ")[1];
       const result = jwt.verify(token, process.env.SECRET_KEY);
       req.user = result;
@@ -18,6 +19,7 @@ const authenticateUser = async (req, res, next) => {
 
 const authorizeUser = (roles) => {
   return function (req, res, next) {
+    console.log(req.user,roles)
     if (roles.includes(req.user.role)) {
       next();
     } else {
