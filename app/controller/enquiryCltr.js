@@ -15,8 +15,10 @@ enquiryCltr.calculate = async (req, res) => {
     "loadType",
     "loadWeight",
     "pickUpLocation",
-    "dropUpLocation",
+    "dropOffLocation",
   ]);
+  console.log(body,'ss');
+
   const errors = validationResult(req);
   try {
     if (!errors.isEmpty()) {
@@ -24,7 +26,8 @@ enquiryCltr.calculate = async (req, res) => {
     }
 
     const pickUpCoordinate = await addressPicker(body.pickUpLocation);
-    const dropCoordinate = await addressPicker(body.dropUpLocation);
+    const dropCoordinate = await addressPicker(body.dropOffLocation);
+    console.log(pickUpCoordinate,dropCoordinate)
     const distanceAndDuration = await calculateDistance([
       pickUpCoordinate,
       dropCoordinate,
@@ -35,17 +38,17 @@ enquiryCltr.calculate = async (req, res) => {
         { maximumWeight: { $gte: body.loadWeight } },
       ],
     });
+    body.vehicleTypeId=vehicle._id
     const shippingAmount = new Intl.NumberFormat("en-IN", {
       style: "currency",
       currency: "INR", // Currency code for Indian Rupees
     }).format(vehicle.pricePerKiloMeter * distanceAndDuration.distance);
 
-    res.json({
-      pickUpCoordinate,
-      dropCoordinate,
-      distanceAndDuration,
-      shippingAmount: shippingAmount.slice(0, -3),
-    });
+    [body.pickUpLocation.lng,body.pickUpLocation.lat] = pickUpCoordinate;
+    [body.dropOffLocation.lng,body.dropOffLocation.lat] = dropCoordinate;
+    body.amount = shippingAmount.slice(0, -3);
+    body.distance = distanceAndDuration;
+    res.json(body);
   } catch (e) {
     res.status(500).json(e.message);
   }
@@ -58,7 +61,7 @@ enquiryCltr.create = async (req, res) => {
     "loadWeight",
     "dateOfPickUp",
     "pickUpLocation",
-    "dropUpLocation",
+    "dropOffLocation",
     "dateOfUnload",
     "paymentType",
     "unloadLocation",
@@ -71,7 +74,7 @@ enquiryCltr.create = async (req, res) => {
     }
 
     const pickUpCoordinate = await addressPicker(body.pickUpLocation);
-    const dropCoordinate = await addressPicker(body.dropUpLocation);
+    const dropCoordinate = await addressPicker(body.dropOffLocation);
     console.log(pickUpCoordinate, dropCoordinate);
     body.coordinates = { pickUpCoordinate, dropCoordinate };
 
@@ -132,7 +135,7 @@ enquiryCltr.myEnquiries = async (req, res) => {
   const role = req.user.role;
   try {
     const enquires = await Enquiry.find(
-      role === "admin" ? null : { shipperId: req.user.id ,delete:false }
+      role === "admin" ? null : { shipperId: req.user.id, delete: false }
     );
     if (!enquires) {
       return res.status(404).json({ error: "no enquiries found" });
@@ -146,7 +149,8 @@ enquiryCltr.myEnquiries = async (req, res) => {
 enquiryCltr.allEnquiry = async (req, res) => {
   try {
     const allEnquiry = await Enquiry.find({
-      dateOfPickUp: { $gte: new Date() },delete:false
+      dateOfPickUp: { $gte: new Date() },
+      delete: false,
     });
     if (allEnquiry.length === 0) {
       return res.status(404).json({ errors: "no enquiry in market" });
@@ -157,7 +161,7 @@ enquiryCltr.allEnquiry = async (req, res) => {
         "loadType",
         "loadWeight",
         "pickUpLocation.district",
-        "dropUpLocation.district",
+        "dropOffLocation.district",
         "amount",
         "paymentType",
       ])
@@ -176,7 +180,7 @@ enquiryCltr.singleEnquiry = async (req, res) => {
     }
     const allEnquiry = await Enquiry.findById(id).populate({
       path: "bids",
-      populate: { path: "userId" },
+      populate: { path: "userId " },
     });
     res.json(allEnquiry);
   } catch (e) {

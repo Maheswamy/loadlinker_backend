@@ -86,7 +86,7 @@ const pickUpLocation = {
     },
   },
 };
-const dropUpLocation = {
+const dropOffLocation = {
   custom: {
     options: async (value) => {
       if (isEmpty(value.address)) {
@@ -118,14 +118,14 @@ const enquiryValidation = {
   dateOfPickUp,
   dateOfUnload,
   pickUpLocation,
-  dropUpLocation,
+  dropOffLocation,
 };
 
 const enquiryCalculationValidation = {
   loadType,
   loadWeight,
   pickUpLocation,
-  dropUpLocation,
+  dropOffLocation,
 };
 
 const enquiryIdValidation = {

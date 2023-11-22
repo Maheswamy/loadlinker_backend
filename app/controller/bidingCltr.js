@@ -70,21 +70,27 @@ biddingCltr.update = async (req, res) => {
 };
 
 biddingCltr.remove = async (req, res) => {
-  const enquiryLoadId = req.params.enquiryLoadId;
   const bidId = req.params.bidId;
   const userId = req.user.id;
+  console.log(bidId,'han')
   const errors = validationResult(req);
   console.log(errors);
   try {
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
+    const deletedBid = await Bid.findOneAndDelete({
+      _id: bidId,
+      userId: userId,
+    });
+    console.log(deletedBid)
     const removedBid = await Enquiry.findByIdAndUpdate(
-      enquiryLoadId,
-      { $pull: { bids: { _id: bidId, userId: userId } } },
+      deletedBid.enquiryId,
+      { $pull: { bids: bidId } },
       { new: true }
     );
-    res.json(removedBid);
+    // console.log(removedBid)
+    res.json(deletedBid);
   } catch (e) {
     res.status(500).json(e);
   }
@@ -138,7 +144,7 @@ biddingCltr.singleBid = async (req, res) => {
   const { role, id } = req.user;
   try {
     const bidsList = await Bid.findOne(
-      role === "admin" ? {} : { _id: bidId,userId: id }
+      role === "admin" ? {} : { _id: bidId, userId: id }
     ).populate({
       path: "enquiryId",
       populate: { path: "shipperId", select: "lastName firstName" },

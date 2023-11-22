@@ -91,16 +91,8 @@ const bidUpdateValidation = {
 };
 
 const bidRemoveValidation = {
-  enquiryLoadId: {
-    notEmpty: {
-      errorMessage: "enquiry id is required",
-      bail: true,
-    },
-    isMongoId: {
-      errorMessage: "invalid mongo id",
-    },
-  },
   bidId: {
+    in:['params'],
     notEmpty: {
       errorMessage: "enquiry id is required",
       bail: true,

@@ -10,7 +10,7 @@ const addressPicker = async (fulladdress) => {
   );
 };
 
-const addressToCoordinate = async (address, lat = "", lng = "") => {
+const addressToCoordinate = async (address, lat , lng ) => {
   console.log(address, lat, lng);
   const query = new URLSearchParams({
     q: lat && lng ? "" : `${address}`,
@@ -34,6 +34,7 @@ const addressToCoordinate = async (address, lat = "", lng = "") => {
 };
 
 const calculateDistance = async (coordinates) => {
+  console.log(coordinates,'coordinates')
   const query = new URLSearchParams({
     key: process.env.GRAPHHOPPER_API_KEY,
   }).toString();

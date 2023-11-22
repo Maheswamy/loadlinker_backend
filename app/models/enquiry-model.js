@@ -19,7 +19,7 @@ const enquirySchema = new Schema(
       },
     },
     dateOfUnload: Date,
-    dropUpLocation: {
+    dropOffLocation: {
       type: {
         address: String,
         area: String,

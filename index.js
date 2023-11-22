@@ -203,7 +203,7 @@ app.get(
 // modifying the bid placed by owner of vehicle
 
 app.put(
-  "/api/bids/:bidId",
+  "/api/mybids/:bidId",
   authenticateUser,
   authorizeUser(["owner"]),
   checkSchema(bidUpdateValidation),
@@ -211,7 +211,7 @@ app.put(
 );
 
 app.delete(
-  "/api/bidding/:enquiryLoadId/:bidId",
+  "/api/mybids/:bidId",
   authenticateUser,
   authorizeUser(["owner"]),
   checkSchema(bidRemoveValidation),
