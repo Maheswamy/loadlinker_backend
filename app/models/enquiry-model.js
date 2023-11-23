@@ -27,6 +27,8 @@ const enquirySchema = new Schema(
         state: String,
         country: String,
         pin: String,
+        lat: String,
+        lng: String,
       },
     },
     coordinates: {

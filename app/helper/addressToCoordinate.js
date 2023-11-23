@@ -34,7 +34,6 @@ const addressToCoordinate = async (address, lat , lng ) => {
 };
 
 const calculateDistance = async (coordinates) => {
-  console.log(coordinates,'coordinates')
   const query = new URLSearchParams({
     key: process.env.GRAPHHOPPER_API_KEY,
   }).toString();

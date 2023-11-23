@@ -17,8 +17,7 @@ enquiryCltr.calculate = async (req, res) => {
     "pickUpLocation",
     "dropOffLocation",
   ]);
-  console.log(body,'ss');
-
+  console.log(body, "body");
   const errors = validationResult(req);
   try {
     if (!errors.isEmpty()) {
@@ -27,25 +26,27 @@ enquiryCltr.calculate = async (req, res) => {
 
     const pickUpCoordinate = await addressPicker(body.pickUpLocation);
     const dropCoordinate = await addressPicker(body.dropOffLocation);
-    console.log(pickUpCoordinate,dropCoordinate)
+
     const distanceAndDuration = await calculateDistance([
       pickUpCoordinate,
       dropCoordinate,
     ]);
+    if (body.pickUpLocation.lat == 0 || body.dropOffLocation.lat == 0) {
+      [body.pickUpLocation.lng, body.pickUpLocation.lat] = pickUpCoordinate;
+      [body.dropOffLocation.lng, body.dropOffLocation.lat] = dropCoordinate;
+    }
     const vehicle = await VehicleType.findOne({
       $and: [
         { minimumWeight: { $lte: body.loadWeight } },
         { maximumWeight: { $gte: body.loadWeight } },
       ],
     });
-    body.vehicleTypeId=vehicle._id
+    body.vehicleTypeId = vehicle._id;
     const shippingAmount = new Intl.NumberFormat("en-IN", {
       style: "currency",
-      currency: "INR", // Currency code for Indian Rupees
+      currency: "INR",
     }).format(vehicle.pricePerKiloMeter * distanceAndDuration.distance);
 
-    [body.pickUpLocation.lng,body.pickUpLocation.lat] = pickUpCoordinate;
-    [body.dropOffLocation.lng,body.dropOffLocation.lat] = dropCoordinate;
     body.amount = shippingAmount.slice(0, -3);
     body.distance = distanceAndDuration;
     res.json(body);
@@ -66,7 +67,7 @@ enquiryCltr.create = async (req, res) => {
     "paymentType",
     "unloadLocation",
   ]);
-
+  console.log(body);
   const errors = validationResult(req);
   try {
     if (!errors.isEmpty()) {
@@ -75,14 +76,11 @@ enquiryCltr.create = async (req, res) => {
 
     const pickUpCoordinate = await addressPicker(body.pickUpLocation);
     const dropCoordinate = await addressPicker(body.dropOffLocation);
-    console.log(pickUpCoordinate, dropCoordinate);
-    body.coordinates = { pickUpCoordinate, dropCoordinate };
-
     const distanceAndDuration = await calculateDistance([
       pickUpCoordinate,
       dropCoordinate,
     ]);
-    console.log(distanceAndDuration, "amsajhdgasgdjh");
+    body.coordinates = { pickUpCoordinate:pickUpCoordinate.reverse(), dropCoordinate:dropCoordinate.reverse() };
     const vehicle = await VehicleType.findOne({
       $and: [
         { minimumWeight: { $lte: body.loadWeight } },
@@ -90,15 +88,19 @@ enquiryCltr.create = async (req, res) => {
       ],
     });
     body.vehicleType = vehicle._id;
-    const shippingAmount =
-      vehicle.pricePerKiloMeter * distanceAndDuration.distance;
+
     body.shipperId = req.user.id;
-    body.amount = Math.round(shippingAmount);
-    (body.distance = distanceAndDuration.distance),
-      (body.duration = distanceAndDuration.time);
+    body.amount = new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+    }).format(
+      Math.round(vehicle.pricePerKiloMeter * distanceAndDuration.distance)
+    );
+
+    body.distance = distanceAndDuration.distance;
     const newLoad = await new Enquiry(body).save();
 
-    res.json({ newLoad });
+    res.json(newLoad);
   } catch (e) {
     res.status(500).json(e.message);
   }
@@ -152,9 +154,6 @@ enquiryCltr.allEnquiry = async (req, res) => {
       dateOfPickUp: { $gte: new Date() },
       delete: false,
     });
-    if (allEnquiry.length === 0) {
-      return res.status(404).json({ errors: "no enquiry in market" });
-    }
     const sanitizeEnquiry = allEnquiry.map((ele) =>
       _.pick(ele, [
         "_id",
