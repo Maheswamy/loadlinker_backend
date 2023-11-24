@@ -1,6 +1,6 @@
 const User = require("../models/user-model");
 
-const notEmptyGenrator = (value) => {
+const notEmptyGenerator = (value) => {
   return {
     errorMessage: `${value} is required`,
     bail: true,
@@ -8,11 +8,11 @@ const notEmptyGenrator = (value) => {
 };
 
 const firstName = {
-  notEmpty: notEmptyGenrator("First Name"),
+  notEmpty: notEmptyGenerator("First Name"),
 };
 
 const password = {
-  notEmpty: notEmptyGenrator("password"),
+  notEmpty: notEmptyGenerator("password"),
   isStrongPassword: {
     errorMessage:
       "password should contain min 8 to max 128 characters with one lowercase , one uppercase, one Number and one Symsbol",
@@ -20,7 +20,7 @@ const password = {
 };
 
 const email = {
-  notEmpty: notEmptyGenrator("Email"),
+  notEmpty: notEmptyGenerator("Email"),
   isEmail: {
     errorMessage: "invalid email id",
     bail: true,
@@ -42,7 +42,7 @@ const email = {
 };
 
 const otpEmail = {
-  notEmpty: notEmptyGenrator("Otp email"),
+  notEmpty: notEmptyGenerator("Otp email"),
   isEmail: {
     errorMessage: "invalid email id",
     bail: true,
@@ -64,7 +64,7 @@ const otpEmail = {
 };
 
 const mobileNumber = {
-  notEmpty: notEmptyGenrator("mobile number"),
+  notEmpty: notEmptyGenerator("mobile number"),
   isAlphanumeric: {
     errorMessage: "please enter the number not string",
     bail: true,
@@ -94,7 +94,7 @@ const mobileNumber = {
 };
 
 const role = {
-  notEmpty: notEmptyGenrator("Role"),
+  notEmpty: notEmptyGenerator("Role"),
   isIn: {
     options: [["owner", "shipper"]],
     errorMessage: "Role should be either Owner or Shipper",
@@ -140,7 +140,7 @@ const loginSchemaValidation = {
 
 const otpVerificationSchema = {
   otp: {
-    notEmpty: notEmptyGenrator("OTP"),
+    notEmpty: notEmptyGenerator("OTP"),
     isLength: {
       options: {
         min: 4,
@@ -158,5 +158,5 @@ module.exports = {
   otpResendValidation,
   loginSchemaValidation,
   otpVerificationSchema,
-  notEmptyGenrator,
+  notEmptyGenerator,
 };

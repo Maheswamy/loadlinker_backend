@@ -1,7 +1,7 @@
 const { isEmpty } = require("lodash");
 const { isMongoId } = require("validator");
 const Vehicle = require("../models/vehicle-model");
-const { notEmptyGenrator } = require("./users-validation");
+const { notEmptyGenerator } = require("./users-validation");
 
 const findVehicleExists = async (value) => {
   const vehicle = await Vehicle.findOne({
@@ -15,7 +15,7 @@ const findVehicleExists = async (value) => {
 };
 
 const permit = {
-  notEmpty: notEmptyGenrator("vehicle Permit"),
+  notEmpty: notEmptyGenerator("vehicle Permit"),
   isArray: {
     options: {
       min: 1,
@@ -37,14 +37,14 @@ const permit = {
 };
 
 const permitLoadCapacity = {
-  notEmpty: notEmptyGenrator("maximum load capacity "),
+  notEmpty: notEmptyGenerator("maximum load capacity "),
   isNumeric: {
     errorMessage: "invalid format",
   },
 };
 
 const vehicleType = {
-  notEmpty: notEmptyGenrator("vehicle type"),
+  notEmpty: notEmptyGenerator("vehicle type"),
   isMongoId: {
     errorMessage: "invalid maongo id",
   },
@@ -77,7 +77,7 @@ const vehiclePhoto = {
 
 const vehicleRegisterValidation = {
   vehicleNumber: {
-    notEmpty: notEmptyGenrator("vehicle number "),
+    notEmpty: notEmptyGenerator("vehicle number "),
     custom: {
       options: (value) => {
         return findVehicleExists(value);
@@ -85,7 +85,7 @@ const vehicleRegisterValidation = {
     },
   },
   rcNumber: {
-    notEmpty: notEmptyGenrator("vehicle RC number "),
+    notEmpty: notEmptyGenerator("vehicle RC number "),
     custom: {
       options: (value) => {
         return findVehicleExists(value);
@@ -104,10 +104,10 @@ const vehicleUpdateValidation = {
   vehiclePhoto,
   vehicleType,
   vehicleNumber: {
-    notEmpty: notEmptyGenrator("vehicle number "),
+    notEmpty: notEmptyGenerator("vehicle number "),
   },
   rcNumber: {
-    notEmpty: notEmptyGenrator("vehicle RC number "),
+    notEmpty: notEmptyGenerator("vehicle RC number "),
   },
 };
 

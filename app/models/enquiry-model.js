@@ -45,7 +45,7 @@ const enquirySchema = new Schema(
     amount: String,
     paymentType: {
       type: String,
-      enum: ["advance", "after shipment"],
+      default:'advance'
     },
     distance: Number,
     approximateTime: {

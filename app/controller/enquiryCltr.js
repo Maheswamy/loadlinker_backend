@@ -9,6 +9,12 @@ const VehicleType = require("../models/vehicleType-model");
 
 const enquiryCltr = {};
 
+// function which split the error array in object and its property
+const errorFormatter = (ele) => {
+  const [obj, prop] = ele.path.split(".");
+  return { obj, prop };
+};
+
 // calculate the amount for enquiry
 enquiryCltr.calculate = async (req, res) => {
   const body = _.pick(req.body, [
@@ -21,7 +27,22 @@ enquiryCltr.calculate = async (req, res) => {
   const errors = validationResult(req);
   try {
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      // creating the error object
+      const formatedError = errors.array().reduce(
+        (pv, cv) => {
+          if (cv.path.includes(".")) {
+            const { obj, prop } = errorFormatter(cv);
+            console.log(obj, prop);
+            pv[`${obj}`][`${prop}`] = cv.msg;
+          } else {
+            pv[cv.path] = cv.msg;
+          }
+          return pv;
+        },
+        { pickUpLocation: {}, dropOffLocation: {} }
+      );
+
+      return res.status(400).json({ errors: formatedError });
     }
 
     const pickUpCoordinate = await addressPicker(body.pickUpLocation);
@@ -64,14 +85,26 @@ enquiryCltr.create = async (req, res) => {
     "pickUpLocation",
     "dropOffLocation",
     "dateOfUnload",
-    "paymentType",
     "unloadLocation",
   ]);
   console.log(body);
   const errors = validationResult(req);
   try {
+    const formatedError = errors.array().reduce(
+      (pv, cv) => {
+        if (cv.path.includes(".")) {
+          const { obj, prop } = errorFormatter(cv);
+          console.log(obj, prop);
+          pv[`${obj}`][`${prop}`] = cv.msg;
+        } else {
+          pv[cv.path] = cv.msg;
+        }
+        return pv;
+      },
+      { pickUpLocation: {}, dropOffLocation: {} }
+    );
     if (!errors.isEmpty()) {
-      return res.json({ errors: errors.array() });
+      return res.status(400).json({ errors: formatedError });
     }
 
     const pickUpCoordinate = await addressPicker(body.pickUpLocation);
@@ -80,7 +113,10 @@ enquiryCltr.create = async (req, res) => {
       pickUpCoordinate,
       dropCoordinate,
     ]);
-    body.coordinates = { pickUpCoordinate:pickUpCoordinate.reverse(), dropCoordinate:dropCoordinate.reverse() };
+    body.coordinates = {
+      pickUpCoordinate: pickUpCoordinate.reverse(),
+      dropCoordinate: dropCoordinate.reverse(),
+    };
     const vehicle = await VehicleType.findOne({
       $and: [
         { minimumWeight: { $lte: body.loadWeight } },

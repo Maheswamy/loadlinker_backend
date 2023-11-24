@@ -1,17 +1,17 @@
 const { isEmpty, isNumeric } = require("validator");
-const { notEmptyGenrator } = require("./users-validation");
+const { notEmptyGenerator } = require("./users-validation");
 const isAfter = require("date-fns/isBefore");
 
 const loadType = {
-  notEmpty: notEmptyGenrator("load type"),
+  notEmpty: notEmptyGenerator("load type"),
   isAlpha: {
     errorMessage: "only string is required ",
   },
 };
 
 const loadWeight = {
-  notEmpty: notEmptyGenrator("load Weight"),
-  isNumeric: {
+  notEmpty: notEmptyGenerator("load Weight"),
+  isAlphanumeric: {
     errorMessage: "please provide proper weigth of load",
     bail: true,
   },
@@ -27,7 +27,7 @@ const loadWeight = {
 };
 
 const dateOfPickUp = {
-  notEmpty: notEmptyGenrator("date of loading"),
+  notEmpty: notEmptyGenerator("date of loading"),
   isISO8601: {
     errorMessage: "Invalid Date and Time.",
     bail: true,
@@ -44,7 +44,7 @@ const dateOfPickUp = {
 };
 
 const dateOfUnload = {
-  notEmpty: notEmptyGenrator("date of Unload"),
+  notEmpty: notEmptyGenerator("date of Unload"),
 
   isISO8601: {
     errorMessage: "Invalid Date and Time.",
@@ -61,55 +61,36 @@ const dateOfUnload = {
   },
 };
 
-const pickUpLocation = {
-  custom: {
-    options: async (value) => {
-      if (isEmpty(value.address)) {
-        throw new Error("address is required");
-      } else if (isEmpty(value.area)) {
-        throw new Error("area is required");
-      } else if (isEmpty(value.district)) {
-        throw new Error("district is required");
-      } else if (isEmpty(value.state)) {
-        throw new Error("state is required");
-      } else if (isEmpty(value.country)) {
-        throw new Error("country is required");
-      } else if (isEmpty(value.pin)) {
-        throw new Error("pincode is required");
-      } else if (isEmpty(value.lat)) {
-        throw new Error("lat is required");
-      } else if (isEmpty(value.lng)) {
-        throw new Error("lng is required");
-      } else {
-        return true;
-      }
-    },
-  },
+const addressValidator = (filedName) => {
+  return {
+    notEmpty: notEmptyGenerator(filedName),
+  };
 };
-const dropOffLocation = {
-  custom: {
-    options: async (value) => {
-      if (isEmpty(value.address)) {
-        throw new Error("address is required");
-      } else if (isEmpty(value.area)) {
-        throw new Error("area is required");
-      } else if (isEmpty(value.district)) {
-        throw new Error("district is required");
-      } else if (isEmpty(value.state)) {
-        throw new Error("state is required");
-      } else if (isEmpty(value.country)) {
-        throw new Error("country is required");
-      } else if (isEmpty(value.pin)) {
-        throw new Error("pincode is required");
-      } else if (isEmpty(value.lat)) {
-        throw new Error("lat is required");
-      } else if (isEmpty(value.lng)) {
-        throw new Error("lng is required");
-      } else {
-        return true;
-      }
-    },
-  },
+
+const generateAddressValidator = (fieldName) => {
+  return {
+    notEmpty: notEmptyGenerator(fieldName),
+  };
+};
+
+const generateLocationValidation = (locationPrefix) => {
+  const locationFields = [
+    "address",
+    "state",
+    "country",
+    "pin",
+    "area",
+    "lat",
+    "lng",
+  ];
+
+  const locationValidation = {};
+  locationFields.forEach((field) => {
+    locationValidation[`${locationPrefix}.${field}`] =
+      generateAddressValidator(field);
+  });
+
+  return locationValidation;
 };
 
 const enquiryValidation = {
@@ -117,15 +98,15 @@ const enquiryValidation = {
   loadWeight,
   dateOfPickUp,
   dateOfUnload,
-  pickUpLocation,
-  dropOffLocation,
+  ...generateLocationValidation("pickUpLocation"),
+  ...generateLocationValidation("dropOffLocation"),
 };
 
 const enquiryCalculationValidation = {
   loadType,
   loadWeight,
-  pickUpLocation,
-  dropOffLocation,
+  ...generateLocationValidation("pickUpLocation"),
+  ...generateLocationValidation("dropOffLocation"),
 };
 
 const enquiryIdValidation = {
@@ -137,4 +118,8 @@ const enquiryIdValidation = {
   },
 };
 
-module.exports = { enquiryValidation, enquiryCalculationValidation ,enquiryIdValidation};
+module.exports = {
+  enquiryValidation,
+  enquiryCalculationValidation,
+  enquiryIdValidation,
+};
