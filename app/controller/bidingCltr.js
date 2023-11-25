@@ -126,7 +126,7 @@ biddingCltr.list = async (req, res) => {
       const bidsList = await Bid.find({ enquiryId: enquiryId }).populate({
         path: "vehicleId enquiryId userId",
         select:
-          "vehicleNumber loadType loadWeight amount firstName lastName mobileNumber",
+          "vehicleNumber loadType loadWeight amount firstName lastName mobileNumber rating",
       });
 
       // if (bidsList.length == 0) {

@@ -9,7 +9,7 @@ const VehicleType = require("../models/vehicleType-model");
 
 const enquiryCltr = {};
 
-// function which split the error array in object and its property
+// function which split the error array into object and its property
 const errorFormatter = (ele) => {
   const [obj, prop] = ele.path.split(".");
   return { obj, prop };
@@ -23,7 +23,6 @@ enquiryCltr.calculate = async (req, res) => {
     "pickUpLocation",
     "dropOffLocation",
   ]);
-  console.log(body, "body");
   const errors = validationResult(req);
   try {
     if (!errors.isEmpty()) {
@@ -32,7 +31,7 @@ enquiryCltr.calculate = async (req, res) => {
         (pv, cv) => {
           if (cv.path.includes(".")) {
             const { obj, prop } = errorFormatter(cv);
-            console.log(obj, prop);
+
             pv[`${obj}`][`${prop}`] = cv.msg;
           } else {
             pv[cv.path] = cv.msg;
@@ -87,14 +86,13 @@ enquiryCltr.create = async (req, res) => {
     "dateOfUnload",
     "unloadLocation",
   ]);
-  console.log(body);
   const errors = validationResult(req);
   try {
     const formatedError = errors.array().reduce(
       (pv, cv) => {
         if (cv.path.includes(".")) {
           const { obj, prop } = errorFormatter(cv);
-          console.log(obj, prop);
+
           pv[`${obj}`][`${prop}`] = cv.msg;
         } else {
           pv[cv.path] = cv.msg;
@@ -149,6 +147,7 @@ enquiryCltr.remove = async (req, res) => {
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
+    console.log(enquiryId);
     const removedEnquiry = await Enquiry.findOneAndDelete(
       req.user.role === "shipper"
         ? {
@@ -160,10 +159,7 @@ enquiryCltr.remove = async (req, res) => {
     if (!removedEnquiry) {
       return res.status(404).json({ error: "no enquiry found" });
     }
-    res.json({
-      message: "successfully enquiry deleted",
-      _id: removedEnquiry._id,
-    });
+    res.json(removedEnquiry );
   } catch (e) {
     res.status(500).json(e.message);
   }
@@ -185,16 +181,18 @@ enquiryCltr.myEnquiries = async (req, res) => {
 };
 
 enquiryCltr.allEnquiry = async (req, res) => {
+
   try {
     const allEnquiry = await Enquiry.find({
       dateOfPickUp: { $gte: new Date() },
-      delete: false,
+      delete: false
     });
     const sanitizeEnquiry = allEnquiry.map((ele) =>
       _.pick(ele, [
         "_id",
         "loadType",
         "loadWeight",
+        'coordinates',
         "pickUpLocation.district",
         "dropOffLocation.district",
         "amount",
@@ -209,14 +207,16 @@ enquiryCltr.allEnquiry = async (req, res) => {
 enquiryCltr.singleEnquiry = async (req, res) => {
   const id = req.params.enquiryId;
   const errors = validationResult(req);
+
   try {
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    const allEnquiry = await Enquiry.findById(id).populate({
-      path: "bids",
-      populate: { path: "userId " },
-    });
+    const allEnquiry = await Enquiry.findById(id);
+    // .populate({
+    //   path: "bids",
+    //   populate: { path: "userId " },
+    // })
     res.json(allEnquiry);
   } catch (e) {
     res.status(500).json(e.message);

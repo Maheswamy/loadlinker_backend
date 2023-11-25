@@ -34,7 +34,9 @@ const dateOfPickUp = {
   },
   custom: {
     options: (value, { req }) => {
-      if (new Date(value) < new Date()) {
+      console.log(new Date(value).toISOString()
+      ,new Date().toISOString())
+      if (new Date(value) < new Date(new Date(Date.now()).toUTCString())) {
         throw new Error("date of Pick Up cannot be less present date ");
       } else {
         return true;

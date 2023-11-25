@@ -36,6 +36,11 @@ const userSchema = new Schema(
         ref: "Vehicle",
       },
     ],
+    rating: Number,
+    review: {
+      type: Schema.Types.ObjectId,
+      ref: "Review",
+    },
   },
 
   { timestamps: true }
