@@ -20,7 +20,7 @@ const reviewSchemaValidation = {
     },
   },
 
-  shippmentId: {
+  shipmentId: {
     notEmpty: {
       errorMessage: "shippment Id is required",
       bail: true,

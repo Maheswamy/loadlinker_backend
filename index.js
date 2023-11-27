@@ -304,7 +304,7 @@ app.put(
 // review api
 
 app.post(
-  "api/reviews",
+  "/api/reviews",
   authenticateUser,
   authorizeUser(["shipper"]),
   checkSchema(reviewSchemaValidation),
