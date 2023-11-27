@@ -41,9 +41,25 @@ const {
 const { verifyUser } = require("./app/middleware/verifiyUser");
 const paymentCltr = require("./app/controller/paymentCltr");
 const app = express();
+
 app.use(express.json());
 app.use(cors());
 const port = process.env.PORT || 3300;
+
+const socketIo = require("socket.io");
+const { createServer } = require("http");
+const reviewSchemaValidation = require("./app/helper/reviewSchemaValidation");
+const reviewCltr = require("./app/controller/reviewCltr");
+const server = createServer(app);
+const io = socketIo(server, {
+  cors: {
+    origin: "*", // or the origin you want to allow
+    methods: ["GET", "POST"],
+    // allowedHeaders: ["my-custom-header"],
+    // credentials: true,
+  },
+});
+require("./config/webSocket")(io);
 dbConfig();
 const upload = multer();
 
@@ -149,9 +165,7 @@ app.get(
 
 app.delete(
   "/api/enquiries/:enquiryId",
-  
   authenticateUser,
-  
   authorizeUser(["admin", "shipper"]),
   checkSchema(enquiryIdValidation),
   enquiryCltr.remove
@@ -159,6 +173,7 @@ app.delete(
 
 //api for all enquiries for owners
 app.get("/api/marketplace", enquiryCltr.allEnquiry);
+app.get("/api/count", authenticateUser, enquiryCltr.count);
 
 // api for details of single enquiry
 app.get(
@@ -257,7 +272,7 @@ app.get(
 app.put(
   "/api/shipments/:shipmentId",
   authenticateUser,
-  authorizeUser(["admin", "owner",'shipper']),
+  authorizeUser(["admin", "owner", "shipper"]),
   checkSchema(updateShipment),
   shipmentCltr.update
 );
@@ -286,6 +301,16 @@ app.put(
   paymentCltr.update
 );
 
-app.listen(port, () => {
+// review api
+
+app.post(
+  "api/reviews",
+  authenticateUser,
+  authorizeUser(["shipper"]),
+  checkSchema(reviewSchemaValidation),
+  reviewCltr.create
+);
+
+server.listen(port, () => {
   console.log("server running at port", port);
 });

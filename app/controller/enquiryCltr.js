@@ -159,7 +159,7 @@ enquiryCltr.remove = async (req, res) => {
     if (!removedEnquiry) {
       return res.status(404).json({ error: "no enquiry found" });
     }
-    res.json(removedEnquiry );
+    res.json(removedEnquiry);
   } catch (e) {
     res.status(500).json(e.message);
   }
@@ -181,18 +181,53 @@ enquiryCltr.myEnquiries = async (req, res) => {
 };
 
 enquiryCltr.allEnquiry = async (req, res) => {
-
+  const { source, destination, loadWeight, skip } = req.query;
   try {
-    const allEnquiry = await Enquiry.find({
-      dateOfPickUp: { $gte: new Date() },
-      delete: false
-    });
+    let allEnquiry = [];
+    if ((source != "" || destination != "") && loadWeight !== "") {
+      allEnquiry = await Enquiry.find({
+        dateOfPickUp: { $gte: new Date() },
+        "pickUpLocation.district": { $regex: source, $options: "i" },
+        "dropOffLocation.district": { $regex: destination, $options: "i" },
+        vehicleType: loadWeight,
+        delete: false,
+      })
+        .skip(+skip)
+        .limit(10);
+    } else if (source != "" || destination != "") {
+      allEnquiry = await Enquiry.find({
+        dateOfPickUp: { $gte: new Date() },
+        "pickUpLocation.district": { $regex: source, $options: "i" },
+        "dropOffLocation.district": { $regex: destination, $options: "i" },
+
+        delete: false,
+      })
+        .skip(+skip)
+        .limit(10);
+    } else if (loadWeight !== "") {
+      allEnquiry = await Enquiry.find({
+        dateOfPickUp: { $gte: new Date() },
+
+        vehicleType: loadWeight,
+        delete: false,
+      })
+        .skip(+skip)
+        .limit(10);
+    } else {
+      allEnquiry = await Enquiry.find({
+        dateOfPickUp: { $gte: new Date() },
+        delete: false,
+      })
+        .skip(+skip)
+        .limit(10);
+    }
+    console.log(allEnquiry);
     const sanitizeEnquiry = allEnquiry.map((ele) =>
       _.pick(ele, [
         "_id",
         "loadType",
         "loadWeight",
-        'coordinates',
+        "coordinates",
         "pickUpLocation.district",
         "dropOffLocation.district",
         "amount",
@@ -213,13 +248,21 @@ enquiryCltr.singleEnquiry = async (req, res) => {
       return res.status(400).json({ errors: errors.array() });
     }
     const allEnquiry = await Enquiry.findById(id);
-    // .populate({
-    //   path: "bids",
-    //   populate: { path: "userId " },
-    // })
     res.json(allEnquiry);
   } catch (e) {
     res.status(500).json(e.message);
+  }
+};
+
+enquiryCltr.count = async (req, res) => {
+  try {
+    const allEnquiry = await Enquiry.find({
+      dateOfPickUp: { $gte: new Date() },
+      delete: false,
+    }).count();
+    res.json(allEnquiry);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 };
 module.exports = enquiryCltr;
