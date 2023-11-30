@@ -49,7 +49,6 @@ shipmentCltr.list = async (req, res) => {
       const shipments = await Shipment.find().populate([
         "enquiryId",
         "bidId",
-        "userId",
         "payment",
       ]);
 
