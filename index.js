@@ -119,9 +119,8 @@ app.get(
 
 app.put(
   "/api/vehicles/:vehicleId",
-  upload.fields([{ name: "vehicleImage" }, { name: "rc" }]),
   authenticateUser,
-  authorizeUser(["owner"]),
+  authorizeUser(["admin"]),
   checkSchema(vehicleUpdateValidation),
   vehicleCltr.update
 );

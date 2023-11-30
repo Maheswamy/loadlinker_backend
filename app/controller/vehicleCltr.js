@@ -66,12 +66,17 @@ vehicleCltr.list = async (req, res) => {
   try {
     const userId = req.user.id;
     const role = req.user.role;
-    const list = await Vehicle.find(
-      role === "admin" ? null : { ownerId: userId }
-    );
-    // if (list.length == 0) {
-    //   return res.status(404).json({ error: "no vehicles found" });
-    // }
+    let list;
+
+    if (role === "admin") {
+      list = await Vehicle.find().populate({
+        path: "ownerId",
+        select: "firstName lastName vehicles",
+      });
+    } else {
+      list = await Vehicle.find({ ownerId: userId });
+    }
+
     res.json(list);
   } catch (e) {
     res.status(500).json(e.message);
@@ -101,40 +106,62 @@ vehicleCltr.singleVehicle = async (req, res) => {
 
 //vehicle details update
 
+// vehicleCltr.update = async (req, res) => {
+//   const userId = req.user.id;
+//   const vehicleId = req.params.vehicleId;
+//   const errors = validationResult(req);
+//   const body = _.pick(req.body, [
+//     "vehicleNumber",
+//     "rcNumber",
+//     "permittedLoadCapacity",
+//     "vehicalType",
+//     "permit",
+//   ]);
+//   try {
+//     if (!errors.isEmpty()) {
+//       return res.status(400).json({ errors: errors.array() });
+//     }
+//     const vehicleDetail = await Vehicle.findOne({
+//       _id: vehicleId,
+//       ownerId: userId,
+//     });
+//     console.log();
+//     if (vehicleDetail.isVerified === "approved") {
+//       return res.status(403).json({
+//         message:
+//           "vehicle is already verified, You can't update the vehicle detials",
+//       });
+//     }
+//     const { rc, vehicleImage } = req.files;
+//     const arrayBuffer = [...rc, ...vehicleImage];
+
+//     console.log(allResolved);
+
+//     res.json("hitted");
+//   } catch (e) {
+//     res.status(500).json({ error: e.message });
+//   }
+// };
+
 vehicleCltr.update = async (req, res) => {
-  const userId = req.user.id;
-  const vehicleId = req.params.vehicleId;
-  const errors = validationResult(req);
-  const body = _.pick(req.body, [
-    "vehicleNumber",
-    "rcNumber",
-    "permittedLoadCapacity",
-    "vehicalType",
-    "permit",
-  ]);
+  const { vehicleId } = req.params;
+
+  const body = _.pick(req.body, ["isVerified", "reasonForRejection"]);
+  if (body.isVerified === "reject") {
+    body.delete = true;
+  }
+
+  const errors = validationResult(req.body);
   try {
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    const vehicleDetail = await Vehicle.findOne({
-      _id: vehicleId,
-      ownerId: userId,
+    const updateVehicle = await Vehicle.findByIdAndUpdate(vehicleId, body, {
+      new: true,
     });
-    console.log();
-    if (vehicleDetail.isVerified === "approved") {
-      return res.status(403).json({
-        message:
-          "vehicle is already verified, You can't update the vehicle detials",
-      });
-    }
-    const { rc, vehicleImage } = req.files;
-    const arrayBuffer = [...rc, ...vehicleImage];
-
-    console.log(allResolved);
-
-    res.json("hitted");
+    res.json(updateVehicle);
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json(e.message);
   }
 };
 

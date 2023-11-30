@@ -99,15 +99,26 @@ const vehicleRegisterValidation = {
 };
 
 const vehicleUpdateValidation = {
-  permit,
-  permitLoadCapacity,
-  vehiclePhoto,
-  vehicleType,
-  vehicleNumber: {
-    notEmpty: notEmptyGenerator("vehicle number "),
+  isVerified: {
+    isIn: {
+      options: [["approved", "reject"]],
+    },
+    errorMessage: "only approve and reject is allowed",
   },
-  rcNumber: {
-    notEmpty: notEmptyGenerator("vehicle RC number "),
+  reasonForRejection: {
+    custom: {
+      options: (value, { req }) => {
+        if (req.isVerified === "reject") {
+          if (isEmpty(value)) {
+            throw new Error("reason for rejection is needed");
+          } else {
+            return true;
+          }
+        } else {
+          return true;
+        }
+      },
+    },
   },
 };
 

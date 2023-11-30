@@ -33,6 +33,13 @@ const vehicleSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "User",
     },
+    delete: {
+      type: Boolean,
+      default: false,
+    },
+    reasonForRejection: {
+      type: String,
+    },
   },
   { timestamps: true }
 );
