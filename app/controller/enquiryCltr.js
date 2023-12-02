@@ -86,6 +86,7 @@ enquiryCltr.create = async (req, res) => {
     "dateOfUnload",
     "unloadLocation",
   ]);
+  console.log(body);
   const errors = validationResult(req);
   try {
     const formatedError = errors.array().reduce(
@@ -132,6 +133,9 @@ enquiryCltr.create = async (req, res) => {
     );
 
     body.distance = distanceAndDuration.distance;
+    body.dateOfPickUp = new Date(body.dateOfPickUp);
+    body.dateOfUnload = new Date(body.dateOfUnload);
+    
     const newLoad = await new Enquiry(body).save();
 
     res.json(newLoad);
@@ -196,7 +200,7 @@ enquiryCltr.allEnquiry = async (req, res) => {
         .limit(10);
     } else if (source != "" || destination != "") {
       allEnquiry = await Enquiry.find({
-        dateOfPickUp: { $gte: new Date() },
+        dateOfPickUp: { $gte: new Date().toISOString() },
         "pickUpLocation.district": { $regex: source, $options: "i" },
         "dropOffLocation.district": { $regex: destination, $options: "i" },
 

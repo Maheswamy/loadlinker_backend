@@ -40,6 +40,7 @@ const {
 } = require("./app/helper/shipmentValidation");
 const { verifyUser } = require("./app/middleware/verifiyUser");
 const paymentCltr = require("./app/controller/paymentCltr");
+
 const app = express();
 
 app.use(express.json());
@@ -50,6 +51,7 @@ const socketIo = require("socket.io");
 const { createServer } = require("http");
 const reviewSchemaValidation = require("./app/helper/reviewSchemaValidation");
 const reviewCltr = require("./app/controller/reviewCltr");
+const analysisCltr = require("./app/controller/analysisCltr");
 const server = createServer(app);
 const io = socketIo(server, {
   cors: {
@@ -310,6 +312,11 @@ app.post(
   reviewCltr.create
 );
 
+app.get("/api/admin", analysisCltr.allInfo);
+
 server.listen(port, () => {
   console.log("server running at port", port);
 });
+
+
+

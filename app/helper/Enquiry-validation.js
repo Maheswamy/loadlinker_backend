@@ -34,9 +34,9 @@ const dateOfPickUp = {
   },
   custom: {
     options: (value, { req }) => {
-      console.log(new Date(value).toISOString()
-      ,new Date().toISOString())
-      if (new Date(value) < new Date(new Date(Date.now()).toUTCString())) {
+      if (
+        new Date(value).toLocaleDateString() < new Date().toLocaleDateString()
+      ) {
         throw new Error("date of Pick Up cannot be less present date ");
       } else {
         return true;
@@ -54,7 +54,10 @@ const dateOfUnload = {
   },
   custom: {
     options: (value, { req }) => {
-      if (!isAfter(new Date(req.body.dateOfPickUp), new Date(value))) {
+      if (
+        new Date(value).toLocaleDateString() <
+        new Date(req.body.dateOfPickUp).toLocaleDateString()
+      ) {
         throw new Error("date of unload cannot be less than date of pick Up");
       } else {
         return true;

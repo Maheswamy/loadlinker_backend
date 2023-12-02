@@ -45,7 +45,7 @@ const enquirySchema = new Schema(
     amount: String,
     paymentType: {
       type: String,
-      default:'advance'
+      default: "advance",
     },
     distance: Number,
     approximateTime: {
