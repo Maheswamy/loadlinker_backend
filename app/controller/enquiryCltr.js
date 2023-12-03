@@ -6,6 +6,7 @@ const {
   calculateDistance,
 } = require("../helper/addressToCoordinate");
 const VehicleType = require("../models/vehicleType-model");
+const Bid = require("../models/bid-model");
 
 const enquiryCltr = {};
 
@@ -152,14 +153,15 @@ enquiryCltr.remove = async (req, res) => {
       return res.status(400).json({ errors: errors.array() });
     }
     console.log(enquiryId);
-    const removedEnquiry = await Enquiry.findOneAndDelete(
+    const removedEnquiry = await Enquiry.findOneAndUpdate(
       req.user.role === "shipper"
         ? {
             _id: enquiryId,
             shipperId: req.user.id,
           }
-        : { _id: enquiryId }
+        : { _id: enquiryId },{delete:true}
     );
+    await Bid.updateMany({enquiryId:removedEnquiry._id},{status:'Enquiry Deleted'})
     if (!removedEnquiry) {
       return res.status(404).json({ error: "no enquiry found" });
     }

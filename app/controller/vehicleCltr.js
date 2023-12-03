@@ -151,7 +151,7 @@ vehicleCltr.update = async (req, res) => {
     body.delete = true;
   }
 
-  const errors = validationResult(req.body);
+  const errors = validationResult(req);
   try {
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -160,6 +160,21 @@ vehicleCltr.update = async (req, res) => {
       new: true,
     });
     res.json(updateVehicle);
+  } catch (e) {
+    res.status(500).json(e.message);
+  }
+};
+
+vehicleCltr.remove = async (req, res) => {
+  const { vehicleId } = req.params;
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const deletedVehicle = await Vehicle.findByIdAndDelete(vehicleId);
+    return res.json(deletedVehicle);
   } catch (e) {
     res.status(500).json(e.message);
   }

@@ -56,7 +56,7 @@ shipmentCltr.list = async (req, res) => {
     }
     if (role === "shipper") {
       const shipments = await Shipment.find({ shipper: id })
-        .populate("enquiryId payment")
+        .populate("enquiryId payment review")
         .populate({
           path: "bidId",
           populate: {
@@ -68,7 +68,7 @@ shipmentCltr.list = async (req, res) => {
     }
     if (role === "owner") {
       const shipments = await Shipment.find({ owner: id })
-        .populate(["enquiryId", "payment"])
+        .populate("enquiryId payment review")
         .populate({
           path: "bidId",
           populate: {

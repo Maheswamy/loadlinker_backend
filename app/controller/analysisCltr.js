@@ -47,6 +47,33 @@ analysisCltr.allInfo = async (req, res) => {
       },
     ]);
 
+    const months = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+
+    const data = users.reduce(
+      (pv, cv) => {
+        pv.find((ele) => ele.name === cv.role).data[months[cv.month - 1]] =
+          cv.numberOfUser;
+        return pv;
+      },
+      [
+        { name: "owner", data: {} },
+        { name: "shipper", data: {} },
+      ]
+    );
+
     const totalUser = users.reduce((pv, cv) => {
       pv += cv.numberOfUser;
       return pv;
@@ -67,6 +94,9 @@ analysisCltr.allInfo = async (req, res) => {
         },
       },
     ]);
+    const formatedShipments = shipments.map((ele) => {
+      return Object.values(ele).reverse();
+    });
 
     const perMonthShipment = await Shipment.aggregate([
       {
@@ -94,6 +124,10 @@ analysisCltr.allInfo = async (req, res) => {
       },
     ]);
 
+    const formatedPerMonthShipment = perMonthShipment.map((ele) => {
+      return Object.values({ ...ele, month: months[ele.month - 1] }).reverse();
+    });
+
     const totalNumberOfVehicle = await Vehicle.find({
       isVerified: "approved",
     }).count();
@@ -115,6 +149,13 @@ analysisCltr.allInfo = async (req, res) => {
       },
     ]);
 
+    //total shipment
+
+    const totalShipment = shipments.reduce((pv, cv) => {
+      pv += cv.count;
+      return pv;
+    }, 0);
+
     // total revenue
 
     const [{ totalRevenue }] = await Payment.aggregate([
@@ -122,14 +163,42 @@ analysisCltr.allInfo = async (req, res) => {
       { $project: { _id: 0, totalRevenue: 1 } },
     ]);
 
+    // month wise revenue
+
+    const dateWiseRevenue = await Payment.aggregate([
+      {
+        $group: {
+          _id: {
+            $dateToString: { format: "%Y-%m-%d", date: "$createdAt" },
+          },
+          revenue: { $sum: "$amount" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          date: "$_id",
+          revenue: 1,
+        },
+      },
+    ]);
+
+    const dateWiseRevenueFormat = dateWiseRevenue.reduce((pv, cv) => {
+      console.log(pv, cv, "jkjkj");
+      pv[cv.date] = cv.revenue;
+      return pv;
+    }, {});
+
     const result = {
-      users,
+      users: data,
       totalUser,
-      shipments,
-      perMonthShipment,
+      shipments: formatedShipments,
+      totalShipment,
+      perMonthShipment: formatedPerMonthShipment,
       totalNumberOfVehicle,
       averageBidPerEnquiry: +averageBidPerEnquiry.averageBids.toFixed(2),
       totalRevenue,
+      dateWiseRevenue:dateWiseRevenueFormat,
     };
     res.json(result);
   } catch (e) {

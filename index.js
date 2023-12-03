@@ -135,6 +135,14 @@ app.post(
   vehicleCltr.addVehicleType
 );
 
+app.delete(
+  "/api/vehicles/:vehicleId",
+  authenticateUser,
+  authorizeUser(["owner"]),
+
+  vehicleCltr.remove
+);
+
 app.get("/api/vehicleTypes", authenticateUser, vehicleCltr.vehicleTypeList);
 
 //calculate the enquiry
@@ -312,11 +320,13 @@ app.post(
   reviewCltr.create
 );
 
-app.get("/api/admin", analysisCltr.allInfo);
+app.get(
+  "/api/admin",
+  authenticateUser,
+  authorizeUser(["admin"]),
+  analysisCltr.allInfo
+);
 
 server.listen(port, () => {
   console.log("server running at port", port);
 });
-
-
-

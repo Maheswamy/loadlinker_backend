@@ -18,7 +18,7 @@ const bidSchema = new Schema({
   status: {
     type: String,
     default: "active",
-    enum: ["active", "rejected", "approved"],
+    enum: ["active", "rejected", "approved",'Enquiry Deleted'],
   },
 });
 

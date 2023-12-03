@@ -122,4 +122,7 @@ const vehicleUpdateValidation = {
   },
 };
 
+
+
+
 module.exports = { vehicleRegisterValidation, vehicleUpdateValidation };

@@ -28,6 +28,10 @@ const shipmentSchema = new Schema(
       enum: ["waiting", "canceled", "loaded", "unloaded"],
       default: "waiting",
     },
+    review:{
+    type:Schema.Types.ObjectId,
+    ref:'Review'
+    }
   },
   { timestamps: true }
 );
