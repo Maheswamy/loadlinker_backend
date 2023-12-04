@@ -4,6 +4,10 @@ const jwt = require("jsonwebtoken");
 const bcryptjs = require("bcryptjs");
 const { validationResult } = require("express-validator");
 const transporter = require("../helper/emailVerification");
+const Payment = require("../models/payment-model");
+const Bid = require("../models/bid-model");
+const Shipment = require("../models/shipment-model");
+const Enquiry = require("../models/enquiry-model");
 
 const usersCltr = {};
 
@@ -160,7 +164,7 @@ usersCltr.login = async (req, res) => {
 };
 
 usersCltr.profile = async (req, res) => {
-  const { id } = req.user;
+  const { id, role } = req.user;
   try {
     const user = await User.findById(id);
     console.log(user);
@@ -173,6 +177,71 @@ usersCltr.profile = async (req, res) => {
       "vehicles",
       "isVerified",
     ]);
+
+    if (role === "shipper") {
+      const [{ revenue }] = await Payment.aggregate([
+        { $group: { _id: "$userId", revenue: { $sum: "$amount" } } },
+      ]);
+      userData.revenue = revenue;
+
+      const [{ averageBidsPerEnquiry }] = await Enquiry.aggregate([
+        {
+          $match: {
+            shipperId: user._id,
+          },
+        },
+        {
+          $project: {
+            numberOfBids: { $size: "$bids" }, // Count the number of bids in each enquiry
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalBids: { $sum: "$numberOfBids" }, // Sum of all bids across enquiries
+            totalEnquiries: { $sum: 1 }, // Count the total number of enquiries
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            averageBidsPerEnquiry: {
+              $divide: ["$totalBids", "$totalEnquiries"],
+            }, // Calculate the average
+          },
+        },
+      ]);
+      userData.bidsPerEnquiry = averageBidsPerEnquiry;
+      return res.json({ userData });
+    }
+
+    if (role === "owner") {
+      const [{ totalAmount }] = await Bid.aggregate([
+        {
+          $match: {
+            userId: user._id, // Convert userId to ObjectId type
+            status: "approved",
+          },
+        },
+        {
+          $group: {
+            _id: null, // Grouping all documents together
+            revenue: { $sum: "$bidAmount" },
+          },
+        },
+        {
+          $project: {
+            _id: 0, // Exclude the default _id field from the output
+            totalAmount: 1,
+          },
+        },
+      ]);
+      userData.revenue = totalAmount;
+
+      return res.json({ userData });
+    }
+
+    userData.revenue = revenue;
     res.json({ userData });
   } catch (e) {
     res.status(500).json(e);

@@ -8,7 +8,6 @@ paymentCltr.create = async (req, res) => {
   console.log(req.body);
   const body = _.pick(req.body, ["amount", "shipmentId"]);
   try {
-    //crateing session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: [
@@ -28,13 +27,13 @@ paymentCltr.create = async (req, res) => {
       cancel_url: `http://localhost:3000/shipment/${body.shipmentId}?payment=cancel`,
     });
 
-    //creating new payment data
     const payment = new Payment(body);
     payment.userId = req.user.id;
     payment.method = "card";
     payment.transactionId = session.id;
     await payment.save();
-    //responding with url to do payment in front-end
+    
+    
     console.log(session);
     res.json({ id: session.id, url: session.url });
   } catch (e) {
@@ -53,7 +52,7 @@ paymentCltr.update = async (req, res) => {
         new: true,
       }
     );
-    
+
     const updateShipment = await Shipment.findByIdAndUpdate(
       body.shipmentId,
       { payment: payment._id },

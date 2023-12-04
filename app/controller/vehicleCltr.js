@@ -74,7 +74,7 @@ vehicleCltr.list = async (req, res) => {
         select: "firstName lastName vehicles",
       });
     } else {
-      list = await Vehicle.find({ ownerId: userId });
+      list = await Vehicle.find({ ownerId: userId, delete: false });
     }
 
     res.json(list);
@@ -147,9 +147,6 @@ vehicleCltr.update = async (req, res) => {
   const { vehicleId } = req.params;
 
   const body = _.pick(req.body, ["isVerified", "reasonForRejection"]);
-  if (body.isVerified === "reject") {
-    body.delete = true;
-  }
 
   const errors = validationResult(req);
   try {
@@ -173,7 +170,13 @@ vehicleCltr.remove = async (req, res) => {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const deletedVehicle = await Vehicle.findByIdAndDelete(vehicleId);
+    const deletedVehicle = await Vehicle.findByIdAndUpdate(
+      vehicleId,
+      {
+        delete: true,
+      },
+      { new: true }
+    );
     return res.json(deletedVehicle);
   } catch (e) {
     res.status(500).json(e.message);

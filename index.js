@@ -182,7 +182,7 @@ app.delete(
 
 //api for all enquiries for owners
 app.get("/api/marketplace", enquiryCltr.allEnquiry);
-app.get("/api/count", authenticateUser, enquiryCltr.count);
+app.get("/api/count", enquiryCltr.count);
 
 // api for details of single enquiry
 app.get(
