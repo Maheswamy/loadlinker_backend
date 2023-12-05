@@ -241,7 +241,6 @@ usersCltr.profile = async (req, res) => {
       return res.json({ userData });
     }
 
-    userData.revenue = revenue;
     res.json({ userData });
   } catch (e) {
     res.status(500).json(e);
