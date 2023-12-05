@@ -247,4 +247,39 @@ usersCltr.profile = async (req, res) => {
   }
 };
 
+usersCltr.update = async (req, res) => {
+  const { id } = req.user;
+  const body = _.pick(req.body, [
+    "firstName",
+    "lastName",
+    "mobileNumber",
+    "email",
+  ]);
+  const errors = validationResult(req);
+  try {
+    if (!errors.isEmpty()) {
+      const errorFormat = errors.array().reduce((pv, cv) => {
+        pv[cv.path] = cv.msg;
+        return pv;
+      }, {});
+      return res.status(400).json(errorFormat);
+    }
+    const updatedProfile = await User.findByIdAndUpdate(id, body, {
+      new: true,
+    });
+    const userData = _.pick(updatedProfile, [
+      "firstName",
+      "lastName",
+      "email",
+      "mobileNumber",
+      "reviews",
+      "vehicles",
+      "isVerified",
+    ]);
+    res.json(userData);
+  } catch (e) {
+    res.status(500).json(e.message);
+  }
+};
+
 module.exports = usersCltr;

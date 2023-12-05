@@ -153,10 +153,75 @@ const otpVerificationSchema = {
   email: otpEmail,
 };
 
+const userUpdateValidation = {
+  firstName: {
+    notEmpty: {
+      errorMessage: "First name is required",
+    },
+  },
+  email: {
+    notEmpty: notEmptyGenerator("Email"),
+    isEmail: {
+      errorMessage: "invalid email id",
+      bail: true,
+    },
+    custom: {
+      options: async (value, { req }) => {
+        try {
+          const user = await User.findOne({
+            email: value,
+            _id: { $ne: req.user.id },
+          });
+          if (!user) {
+            return true;
+          } else {
+            throw new Error("email already exists");
+          }
+        } catch (e) {
+          throw new Error(e.message);
+        }
+      },
+    },
+  },
+  mobileNumber: {
+    notEmpty: notEmptyGenerator("mobile number"),
+    isAlphanumeric: {
+      errorMessage: "please enter the number not string",
+      bail: true,
+    },
+    isLength: {
+      options: {
+        min: 10,
+        max: 10,
+      },
+      errorMessage: "invalid mobile number",
+      bail: true,
+    },
+    custom: {
+      options: async (value, { req }) => {
+        try {
+          const user = await User.findOne({
+            mobileNumber: value,
+            _id: { $ne: req.user.id },
+          });
+          if (!user) {
+            return true;
+          } else {
+            throw new Error("mobile number already exists");
+          }
+        } catch (e) {
+          throw new Error(e.message);
+        }
+      },
+    },
+  },
+};
+
 module.exports = {
   registerSchemaValidation,
   otpResendValidation,
   loginSchemaValidation,
   otpVerificationSchema,
   notEmptyGenerator,
+  userUpdateValidation,
 };

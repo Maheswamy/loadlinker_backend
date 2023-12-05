@@ -10,6 +10,7 @@ const {
   otpResendValidation,
   loginSchemaValidation,
   otpVerificationSchema,
+  userUpdateValidation,
 } = require("./app/helper/users-validation");
 const {
   authenticateUser,
@@ -89,6 +90,12 @@ app.post(
 app.post("/api/login", checkSchema(loginSchemaValidation), usersCltr.login);
 
 app.get("/api/users/profile", authenticateUser, usersCltr.profile);
+app.put(
+  "/api/users/profile",
+  authenticateUser,
+  checkSchema(userUpdateValidation),
+  usersCltr.update
+);
 
 //vehicle api's
 // add vehicle end point for owner and admin
