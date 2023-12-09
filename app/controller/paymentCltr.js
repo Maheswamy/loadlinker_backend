@@ -23,8 +23,8 @@ paymentCltr.create = async (req, res) => {
         },
       ],
       mode: "payment",
-      success_url: `http://localhost:3000/shipment/${body.shipmentId}?payment=success`,
-      cancel_url: `http://localhost:3000/shipment/${body.shipmentId}?payment=cancel`,
+      success_url: `https://loadlinker-frontend.vercel.app/shipment/${body.shipmentId}?payment=success`,
+      cancel_url: `https://loadlinker-frontend.vercel.app/shipment/${body.shipmentId}?payment=cancel`,
     });
 
     const payment = new Payment(body);

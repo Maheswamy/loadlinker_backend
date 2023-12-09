@@ -167,7 +167,6 @@ usersCltr.profile = async (req, res) => {
   const { id, role } = req.user;
   try {
     const user = await User.findById(id);
-    console.log(user);
     const userData = _.pick(user, [
       "firstName",
       "lastName",
@@ -177,6 +176,7 @@ usersCltr.profile = async (req, res) => {
       "vehicles",
       "isVerified",
     ]);
+    console.log(user, "sjdka");
 
     if (role === "shipper") {
       const [{ revenue }] = await Payment.aggregate([
@@ -184,7 +184,7 @@ usersCltr.profile = async (req, res) => {
       ]);
       userData.revenue = revenue;
 
-      const [{ averageBidsPerEnquiry }] = await Enquiry.aggregate([
+      const averageBidsPerEnquiry = await Enquiry.aggregate([
         {
           $match: {
             shipperId: user._id,
@@ -211,12 +211,12 @@ usersCltr.profile = async (req, res) => {
           },
         },
       ]);
-      userData.bidsPerEnquiry = averageBidsPerEnquiry;
+      userData.bidsPerEnquiry = averageBidsPerEnquiry[0]?.averageBidsPerEnquiry;
       return res.json({ userData });
     }
 
     if (role === "owner") {
-      const [{ totalAmount }] = await Bid.aggregate([
+      const totalAmount = await Bid.aggregate([
         {
           $match: {
             userId: user._id, // Convert userId to ObjectId type
@@ -226,7 +226,7 @@ usersCltr.profile = async (req, res) => {
         {
           $group: {
             _id: null, // Grouping all documents together
-            revenue: { $sum: "$bidAmount" },
+            totalAmount: { $sum: "$bidAmount" },
           },
         },
         {
@@ -236,14 +236,15 @@ usersCltr.profile = async (req, res) => {
           },
         },
       ]);
-      userData.revenue = totalAmount;
+
+      userData.revenue = totalAmount[0]?.totalAmount;
 
       return res.json({ userData });
     }
 
     res.json({ userData });
   } catch (e) {
-    res.status(500).json(e);
+    res.status(500).json(e.message);
   }
 };
 
