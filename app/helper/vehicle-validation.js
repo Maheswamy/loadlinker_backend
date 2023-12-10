@@ -19,7 +19,7 @@ const permit = {
   isArray: {
     options: {
       min: 1,
-      max: 27,
+      max: 28,
     },
     errorMessage: "min one permitt is required",
     bail: true,
@@ -40,6 +40,17 @@ const permitLoadCapacity = {
   notEmpty: notEmptyGenerator("maximum load capacity "),
   isNumeric: {
     errorMessage: "invalid format",
+  },
+  custom: {
+    options: (value) => {
+      if (value > 49000) {
+        throw new Error(
+          "Maximum vehicle load capacity in this application is 49,000kg "
+        );
+      } else {
+        return true;
+      }
+    },
   },
 };
 
@@ -121,8 +132,5 @@ const vehicleUpdateValidation = {
     },
   },
 };
-
-
-
 
 module.exports = { vehicleRegisterValidation, vehicleUpdateValidation };

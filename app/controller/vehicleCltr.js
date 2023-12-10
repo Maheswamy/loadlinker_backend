@@ -29,7 +29,13 @@ vehicleCltr.addVehicle = async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      const formatedErrors=errors.array().reduce((pv, cv) => {
+        if (!pv[cv.path]) {
+          pv[cv.path] = cv.msg;
+        }
+        return pv;
+      }, {});
+      return res.status(400).json({ errors: formatedErrors });
     }
     console.log(body);
     const { rc, vehicleImage } = req.files;
@@ -103,45 +109,6 @@ vehicleCltr.singleVehicle = async (req, res) => {
     res.status(500).json(e.message);
   }
 };
-
-//vehicle details update
-
-// vehicleCltr.update = async (req, res) => {
-//   const userId = req.user.id;
-//   const vehicleId = req.params.vehicleId;
-//   const errors = validationResult(req);
-//   const body = _.pick(req.body, [
-//     "vehicleNumber",
-//     "rcNumber",
-//     "permittedLoadCapacity",
-//     "vehicalType",
-//     "permit",
-//   ]);
-//   try {
-//     if (!errors.isEmpty()) {
-//       return res.status(400).json({ errors: errors.array() });
-//     }
-//     const vehicleDetail = await Vehicle.findOne({
-//       _id: vehicleId,
-//       ownerId: userId,
-//     });
-//     console.log();
-//     if (vehicleDetail.isVerified === "approved") {
-//       return res.status(403).json({
-//         message:
-//           "vehicle is already verified, You can't update the vehicle detials",
-//       });
-//     }
-//     const { rc, vehicleImage } = req.files;
-//     const arrayBuffer = [...rc, ...vehicleImage];
-
-//     console.log(allResolved);
-
-//     res.json("hitted");
-//   } catch (e) {
-//     res.status(500).json({ error: e.message });
-//   }
-// };
 
 vehicleCltr.update = async (req, res) => {
   const { vehicleId } = req.params;

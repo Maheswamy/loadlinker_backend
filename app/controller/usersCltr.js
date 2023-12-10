@@ -8,6 +8,7 @@ const Payment = require("../models/payment-model");
 const Bid = require("../models/bid-model");
 const Shipment = require("../models/shipment-model");
 const Enquiry = require("../models/enquiry-model");
+const mongoose = require("mongoose");
 
 const usersCltr = {};
 
@@ -176,7 +177,6 @@ usersCltr.profile = async (req, res) => {
       "vehicles",
       "isVerified",
     ]);
-    console.log(user, "sjdka");
 
     if (role === "shipper") {
       const [{ revenue }] = await Payment.aggregate([
@@ -216,6 +216,8 @@ usersCltr.profile = async (req, res) => {
     }
 
     if (role === "owner") {
+      // const userIdObject = mongoose.Types.ObjectId(id);
+      
       const totalAmount = await Bid.aggregate([
         {
           $match: {
@@ -236,7 +238,7 @@ usersCltr.profile = async (req, res) => {
           },
         },
       ]);
-
+      console.log(totalAmount);
       userData.revenue = totalAmount[0]?.totalAmount;
 
       return res.json({ userData });
