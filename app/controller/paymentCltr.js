@@ -7,7 +7,11 @@ const paymentCltr = {};
 paymentCltr.create = async (req, res) => {
   console.log(req.body);
   const body = _.pick(req.body, ["amount", "shipmentId"]);
+  const errors = validationResult(req);
   try {
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: [
@@ -32,8 +36,7 @@ paymentCltr.create = async (req, res) => {
     payment.method = "card";
     payment.transactionId = session.id;
     await payment.save();
-    
-    
+
     console.log(session);
     res.json({ id: session.id, url: session.url });
   } catch (e) {
@@ -43,8 +46,11 @@ paymentCltr.create = async (req, res) => {
 
 paymentCltr.update = async (req, res) => {
   const body = _.pick(req.body, ["shipmentId", "transactionId"]);
-
+  const errors = validationResult(req);
   try {
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
     const payment = await Payment.findOneAndUpdate(
       { transactionId: body.transactionId },
       { status: "paid" },

@@ -87,7 +87,6 @@ enquiryCltr.create = async (req, res) => {
     "dateOfUnload",
     "unloadLocation",
   ]);
-  console.log(body);
   const errors = validationResult(req);
   try {
     const formatedError = errors.array().reduce(
@@ -136,7 +135,7 @@ enquiryCltr.create = async (req, res) => {
     body.distance = distanceAndDuration.distance;
     body.dateOfPickUp = new Date(body.dateOfPickUp);
     body.dateOfUnload = new Date(body.dateOfUnload);
-    
+
     const newLoad = await new Enquiry(body).save();
 
     res.json(newLoad);
@@ -152,16 +151,19 @@ enquiryCltr.remove = async (req, res) => {
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    console.log(enquiryId);
     const removedEnquiry = await Enquiry.findOneAndUpdate(
       req.user.role === "shipper"
         ? {
             _id: enquiryId,
             shipperId: req.user.id,
           }
-        : { _id: enquiryId },{delete:true}
+        : { _id: enquiryId },
+      { delete: true }
     );
-    await Bid.updateMany({enquiryId:removedEnquiry._id},{status:'Enquiry Deleted'})
+    await Bid.updateMany(
+      { enquiryId: removedEnquiry._id },
+      { status: "Enquiry Deleted" }
+    );
     if (!removedEnquiry) {
       return res.status(404).json({ error: "no enquiry found" });
     }
@@ -199,7 +201,7 @@ enquiryCltr.allEnquiry = async (req, res) => {
         delete: false,
       })
         .skip(+skip)
-        .limit(10);
+        .limit(9);
     } else if (source != "" || destination != "") {
       allEnquiry = await Enquiry.find({
         dateOfPickUp: { $gte: new Date().toISOString() },
@@ -209,7 +211,7 @@ enquiryCltr.allEnquiry = async (req, res) => {
         delete: false,
       })
         .skip(+skip)
-        .limit(10);
+        .limit(9);
     } else if (loadWeight !== "") {
       allEnquiry = await Enquiry.find({
         dateOfPickUp: { $gte: new Date() },
@@ -218,16 +220,15 @@ enquiryCltr.allEnquiry = async (req, res) => {
         delete: false,
       })
         .skip(+skip)
-        .limit(10);
+        .limit(9);
     } else {
       allEnquiry = await Enquiry.find({
         dateOfPickUp: { $gte: new Date() },
         delete: false,
       })
         .skip(+skip)
-        .limit(10);
+        .limit(9);
     }
-    console.log(allEnquiry);
     const sanitizeEnquiry = allEnquiry.map((ele) =>
       _.pick(ele, [
         "_id",
@@ -266,7 +267,7 @@ enquiryCltr.count = async (req, res) => {
       dateOfPickUp: { $gte: new Date() },
       delete: false,
     }).count();
-    res.json(allEnquiry);
+    res.json(Math.floor(allEnquiry / 9));
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

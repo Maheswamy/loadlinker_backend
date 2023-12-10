@@ -53,6 +53,10 @@ const { createServer } = require("http");
 const reviewSchemaValidation = require("./app/helper/reviewSchemaValidation");
 const reviewCltr = require("./app/controller/reviewCltr");
 const analysisCltr = require("./app/controller/analysisCltr");
+const {
+  paymentValidation,
+  paymentUpdateValidation,
+} = require("./app/helper/paymentValidation");
 const server = createServer(app);
 const io = socketIo(server, {
   cors: {
@@ -146,7 +150,6 @@ app.delete(
   "/api/vehicles/:vehicleId",
   authenticateUser,
   authorizeUser(["owner"]),
-
   vehicleCltr.remove
 );
 
@@ -157,7 +160,7 @@ app.post(
   "/api/enquiries/calculate",
   authenticateUser,
   authorizeUser(["admin", "shipper"]),
-  // checkSchema(enquiryCalculationValidation),
+  checkSchema(enquiryCalculationValidation),
   verifyUser,
   enquiryCltr.calculate
 );
@@ -167,7 +170,7 @@ app.post(
   "/api/enquiries/create",
   authenticateUser,
   authorizeUser(["admin", "shipper"]),
-  // checkSchema(enquiryValidation),
+  checkSchema(enquiryValidation),
   enquiryCltr.create
 );
 
@@ -293,20 +296,13 @@ app.put(
   shipmentCltr.update
 );
 
-// // single shipment api
-// app.get(
-//   "/api/shipments/:shipmentId",
-//   authenticateUser,
-//   authorizeUser(["admin", "shipper"]),
-//   shipmentCltr.singleShipment
-// );
-
 // payment create
 
 app.post(
   "/api/payment",
   authenticateUser,
   authorizeUser(["shipper"]),
+  checkSchema(paymentValidation),
   paymentCltr.create
 );
 
@@ -314,6 +310,7 @@ app.put(
   "/api/payment",
   authenticateUser,
   authorizeUser(["shipper"]),
+  checkSchema(paymentUpdateValidation),
   paymentCltr.update
 );
 
