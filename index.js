@@ -153,7 +153,7 @@ app.delete(
   vehicleCltr.remove
 );
 
-app.get("/api/vehicleTypes", authenticateUser, vehicleCltr.vehicleTypeList);
+app.get("/api/vehicleTypes", vehicleCltr.vehicleTypeList);
 
 //calculate the enquiry
 app.post(
