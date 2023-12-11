@@ -3,6 +3,7 @@ const _ = require("lodash");
 const Payment = require("../models/payment-model");
 const Shipment = require("../models/shipment-model");
 const paymentCltr = {};
+const { validationResult } = require("express-validator");
 
 paymentCltr.create = async (req, res) => {
   console.log(req.body);
