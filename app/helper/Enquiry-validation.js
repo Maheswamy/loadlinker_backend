@@ -1,6 +1,4 @@
-const { isEmpty, isNumeric } = require("validator");
 const { notEmptyGenerator } = require("./users-validation");
-const isAfter = require("date-fns/isBefore");
 
 const loadType = {
   notEmpty: notEmptyGenerator("load type"),
@@ -28,7 +26,10 @@ const loadWeight = {
 
 const dateOfPickUp = {
   notEmpty: notEmptyGenerator("date of loading"),
-  isISO8601: {
+  isDate: {
+    options: {
+      format: "MM/DD/YYYY",
+    },
     errorMessage: "Invalid Date and Time.",
     bail: true,
   },
@@ -48,7 +49,10 @@ const dateOfPickUp = {
 const dateOfUnload = {
   notEmpty: notEmptyGenerator("date of Unload"),
 
-  isISO8601: {
+  isDate: {
+    options: {
+      format: "MM/DD/YYYY",
+    },
     errorMessage: "Invalid Date and Time.",
     bail: true,
   },
