@@ -105,8 +105,8 @@ const generateLocationValidation = (locationPrefix) => {
 const enquiryValidation = {
   loadType,
   loadWeight,
-  dateOfPickUp,
-  dateOfUnload,
+  // dateOfPickUp,
+  // dateOfUnload,
   ...generateLocationValidation("pickUpLocation"),
   ...generateLocationValidation("dropOffLocation"),
 };
